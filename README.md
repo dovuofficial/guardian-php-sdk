@@ -14,14 +14,15 @@ This is where your description should go. Try and limit it to a paragraph or two
 You can install the package via composer:
 
 ```bash
-composer require jonwood2/guardian-php-sdk
+composer require dovuofficial/guardian-php-sdk
 ```
 
 ## Usage
 
 ```php
-$skeleton = new Dovu\GuardianPhpSdk();
-echo $skeleton->echoPhrase('Hello, Jonwood2!');
+$sdk = new Dovu\GuardianPhpSdk();
+echo $sdk->accounts->create('username','password');
+echo $sdk->accounts->login('username','password');
 ```
 
 ## Testing
