@@ -1,6 +1,3 @@
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/support-ukraine.svg?t=1" />](https://supportukrainenow.org)
-
 # A PHP SDK to work with The Guardian
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/jonwood2/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/jonwood2/guardian-php-sdk)
@@ -21,8 +18,8 @@ composer require dovuofficial/guardian-php-sdk
 
 ```php
 $sdk = new Dovu\GuardianPhpSdk();
-echo $sdk->accounts->create('username','password');
-echo $sdk->accounts->login('username','password');
+$response = $sdk->accounts->create('username','password');
+$response =  $sdk->accounts->login('username','password');
 ```
 
 ## Testing

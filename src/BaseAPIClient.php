@@ -21,16 +21,10 @@ class BaseAPIClient
 
     public function __construct()
     {
-        $this->client = new Client();
-
 
         $this->client = new Client([
             'base_uri' => self::API_URL,
             'http_errors' => false,
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
         ]);
     }
 
@@ -61,6 +55,13 @@ class BaseAPIClient
 
     protected function request(string $verb, string $uri, array $payload = [])
     {
+
+        $payload['headers'] = [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => "Bearer {$this->apiToken}"
+        ];
+
         $response = $this->client->request(
             $verb,
             $uri,
