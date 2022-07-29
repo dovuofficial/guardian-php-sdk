@@ -2,7 +2,7 @@
 
 require('./vendor/autoload.php');
 
-use Jonwood2\GuardianPhpSdk\DovuGuardianAPI;
+use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 
 $sdk = new DovuGuardianAPI;
 

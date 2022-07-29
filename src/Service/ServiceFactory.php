@@ -1,6 +1,6 @@
 <?php
 
-namespace Jonwood2\GuardianPhpSdk\Service;
+namespace Dovu\GuardianPhpSdk\Service;
 
 /**
  * Service factory class for API resources.

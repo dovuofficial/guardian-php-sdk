@@ -1,13 +1,13 @@
 <?php
 
-namespace Jonwood2\GuardianPhpSdk;
+namespace Dovu\GuardianPhpSdk;
 
 use Exception;
 use GuzzleHttp\Client;
-use Jonwood2\GuardianPhpSdk\Exceptions\FailedActionException;
-use Jonwood2\GuardianPhpSdk\Exceptions\NotFoundException;
-use Jonwood2\GuardianPhpSdk\Exceptions\UnauthorizedException;
-use Jonwood2\GuardianPhpSdk\Exceptions\ValidationException;
+use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
+use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
+use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
+use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
 use Psr\Http\Message\ResponseInterface;
 
 class BaseAPIClient

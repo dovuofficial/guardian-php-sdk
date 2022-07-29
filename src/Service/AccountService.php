@@ -1,6 +1,6 @@
 <?php
 
-namespace Jonwood2\GuardianPhpSdk\Service;
+namespace Dovu\GuardianPhpSdk\Service;
 
 class AccountService extends AbstractService
 {

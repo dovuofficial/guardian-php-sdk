@@ -20,7 +20,7 @@ composer require jonwood2/guardian-php-sdk
 ## Usage
 
 ```php
-$skeleton = new Jonwood2\GuardianPhpSdk();
+$skeleton = new Dovu\GuardianPhpSdk();
 echo $skeleton->echoPhrase('Hello, Jonwood2!');
 ```
 

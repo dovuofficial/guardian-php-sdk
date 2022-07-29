@@ -1,16 +1,15 @@
 {
-    "name": "jonwood2/guardian-php-sdk",
+    "name": "dovuofficial/guardian-php-sdk",
     "description": "A PHP SDK to work with The Guardian",
     "keywords": [
-        "jonwood2",
         "guardian-php-sdk"
     ],
-    "homepage": "https://github.com/jonwood2/guardian-php-sdk",
+    "homepage": "https://github.com/dovuofficial/guardian-php-sdk",
     "license": "MIT",
     "authors": [
         {
-            "name": "jonwood2",
-            "email": "jonwood2@googlemail.com",
+            "name": "Jonathan Wood",
+            "email": "jonathan.wood@dovu.io",
             "role": "Developer"
         }
     ],
@@ -25,12 +24,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Jonwood2\\GuardianPhpSdk\\": "src"
+            "Dovu\\GuardianPhpSdk\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Jonwood2\\GuardianPhpSdk\\Tests\\": "tests"
+            "Dovu\\GuardianPhpSdk\\Tests\\": "tests"
         }
     },
     "scripts": {

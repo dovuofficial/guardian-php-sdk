@@ -1,8 +1,8 @@
 <?php
 
-namespace Jonwood2\GuardianPhpSdk;
+namespace Dovu\GuardianPhpSdk;
 
-use Jonwood2\GuardianPhpSdk\Service\ServiceFactory;
+use Dovu\GuardianPhpSdk\Service\ServiceFactory;
 
 class DovuGuardianAPI extends BaseAPIClient
 {

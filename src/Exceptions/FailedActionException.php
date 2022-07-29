@@ -1,6 +1,6 @@
 <?php
 
-namespace Jonwood2\GuardianPhpSdk\Exceptions;
+namespace Dovu\GuardianPhpSdk\Exceptions;
 
 use Exception;
 

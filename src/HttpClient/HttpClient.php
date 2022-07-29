@@ -1,9 +1,9 @@
 <?php
 
-namespace Jonwood2\GuardianPhpSdk\HttpClient;
+namespace Dovu\GuardianPhpSdk\HttpClient;
 
 use GuzzleHttp\Client;
-use Jonwood2\GuardianPhpSdk\Traits\MakesHttpRequests;
+use Dovu\GuardianPhpSdk\Traits\MakesHttpRequests;
 
 class HttpClient
 {

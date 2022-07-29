@@ -1,6 +1,6 @@
 <?php
 
-use Jonwood2\GuardianPhpSdk\Service\AccountService;
+use Dovu\GuardianPhpSdk\Service\AccountService;
 
 return [
 
