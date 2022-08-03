@@ -36,12 +36,12 @@ class ServiceFactory extends AbstractServiceFactory
      */
     public function importServicesFromConfig()
     {
-        return (include('./config/app.php'))['services'];
+        return (include "./config/app.php")['services'];
     }
 
     /**
      * @param string $name
-     * @return null|AbstractService
+     * @return null
      */
     public function __get(string $name)
     {

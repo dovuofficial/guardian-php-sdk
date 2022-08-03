@@ -8,7 +8,9 @@ use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
 use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
 use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
 use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Psr7\Request;
 
 class BaseAPIClient
 {
@@ -24,13 +26,14 @@ class BaseAPIClient
 
         $this->client = new Client([
             'base_uri' => self::API_URL,
-            'http_errors' => false,
+            'http_errors' => true,
+            'debug' => true
         ]);
     }
 
     public function setApiToken(string $apiToken)
     {
-        $this->apiToken = $this->apiToken;
+        $this->apiToken = $apiToken;
     }
 
     protected function get(string $uri)
@@ -56,26 +59,35 @@ class BaseAPIClient
     protected function request(string $verb, string $uri, array $payload = [])
     {
 
-        $payload['headers'] = [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
+        if (!empty($this->apiToken)) {
+            $payload['headers'] = [
                 'Authorization' => "Bearer {$this->apiToken}"
-        ];
-
-        $response = $this->client->request(
-            $verb,
-            $uri,
-            empty($payload) ? [] : ['form_params' => $payload]
-        );
-
-        if (! $this->isSuccessful($response)) {
-            return $this->handleRequestError($response);
+            ];
         }
 
-        $responseBody = (string) $response->getBody();
 
-        return json_decode($responseBody, true) ?: $responseBody;
+        try {
+            $response = $this->client->request(
+                $verb,
+                $uri,
+                $payload
+            );
+
+            if (! $this->isSuccessful($response)) {
+                return $this->handleRequestError($response);
+            }
+
+            $responseBody = (string) $response->getBody();
+
+            return json_decode($responseBody, true) ?: $responseBody;
+
+        } catch(RequestException $e) {
+
+            ray($e);
+
+        }
     }
+
 
     public function isSuccessful($response): bool
     {
@@ -88,6 +100,8 @@ class BaseAPIClient
 
     protected function handleRequestError(ResponseInterface $response): void
     {
+        ray($response);
+
         if ($response->getStatusCode() === 422) {
             throw new ValidationException(json_decode((string) $response->getBody(), true));
         }
