@@ -20,7 +20,7 @@ class PolicyService extends AbstractService
             $document = json_decode($document, true);
         }
 
-        return $this->client->postJson("policies/{$policyId}/project/", $document);
+        return $this->client->postJson("policies/{$policyId}/project", $document);
     }
 
 
