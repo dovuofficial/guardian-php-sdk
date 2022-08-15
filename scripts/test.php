@@ -33,7 +33,7 @@ $user = $sdk->accounts->login('jon2', 'secret');
 
 $sdk->setApiToken($user['data']['accessToken']);
 
-$sdk->accounts->role($policyId, 'registrant');
+// $sdk->accounts->role($policyId, 'registrant');
 
 // $sdk->policies->registerApplication($policyId, $document);
 
