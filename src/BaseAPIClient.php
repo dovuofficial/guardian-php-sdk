@@ -2,93 +2,128 @@
 
 namespace Dovu\GuardianPhpSdk;
 
-use Exception;
-use GuzzleHttp\Client;
-use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
-use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
-use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
-use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
-use GuzzleHttp\Exception\RequestException;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Psr7\Request;
-
+use Dovu\GuardianPhpSdk\HttpClient\HttpClient;
 class BaseAPIClient
 {
     /** @var string */
     public string $apiToken = "";
 
-    public Client $client;
+    public string $hmacSecret = "";
 
-    private const API_URL = "http://localhost:3001/api/";
+    public array $config = [];
+
+
 
     public function __construct()
     {
+        $this->config = $this->getConfigFromFile();
 
-        $this->client = new Client([
-            'base_uri' => self::API_URL,
-            'http_errors' => true,
-            'debug' => true
-        ]);
+        $this->base_uri = $this->config['app']['base_url'];
     }
 
+    /**
+     *
+     * @param string $apiToken
+     * @return void
+     */
     public function setApiToken(string $apiToken)
     {
         $this->apiToken = $apiToken;
     }
 
+
+    /**
+     *
+     * @param string $secret
+     * @return void
+     */
+    public function setHmacSecret(string $secret)
+    {
+        $this->hmacSecret = $secret;
+    }
+
+
+    /**
+     *
+     * @param string $uri
+     * @return void
+     */
     protected function get(string $uri)
     {
-        return $this->request('GET', $uri);
+        $client = HttpClient::get()
+                    ->withBaseUri($this->base_uri)
+                    ->withHmac($this->base_uri.$uri, [], $this->hmacSecret);
+
+        $client->setApiToken($this->apiToken);
+                    
+        return $client->request($uri);
     }
 
+
+    /**
+     *
+     * @param string $uri
+     * @param array $payload
+     * @return void
+     */
     public function post(string $uri, array $payload = [])
     {
-        return $this->request('POST', $uri, $payload);
+        $client = HttpClient::post()
+                    ->withBaseUri($this->base_uri)
+                    ->withBody(['form_params' => $payload])
+                    ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
+
+
+        $client->setApiToken($this->apiToken);
+
+        return $client->request($uri);
     }
 
-    protected function put(string $uri, array $payload = [])
+
+    /**
+     *
+     * @param string $uri
+     * @param [type] $payload
+     * @return void
+     */
+    public function postJson(string $uri, $payload )
     {
-        return $this->request('PUT', $uri, $payload);
+        $client = HttpClient::post()
+                    ->withBaseUri($this->base_uri)
+                    ->withBody(['json' => $payload])
+                    ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
+
+        $client->setApiToken($this->apiToken);
+                    
+        return $client->request($uri);
     }
 
-    protected function delete(string $uri, array $payload = [])
+
+    /**
+     *
+     * @param string $uri
+     * @param array $payload
+     * @return void
+     */
+    public function put(string $uri, array $payload = [])
     {
-        return $this->request('DELETE', $uri, $payload);
-    }
+        $client = HttpClient::put()
+                    ->withBaseUri($this->base_uri)
+                    ->withBody(['form_params' => $payload])
+                    ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
 
-    protected function request(string $verb, string $uri, array $payload = [])
-    {
+        $client->setApiToken($this->apiToken);
+                    
+        return $client->request($uri);
 
-        if (!empty($this->apiToken)) {
-            $payload['headers'] = [
-                'Authorization' => "Bearer {$this->apiToken}"
-            ];
-        }
-
-
-        try {
-            $response = $this->client->request(
-                $verb,
-                $uri,
-                $payload
-            );
-
-            if (! $this->isSuccessful($response)) {
-                return $this->handleRequestError($response);
-            }
-
-            $responseBody = (string) $response->getBody();
-
-            return json_decode($responseBody, true) ?: $responseBody;
-
-        } catch(RequestException $e) {
-
-            ray($e);
-
-        }
     }
 
 
+    /**
+     *
+     * @param [type] $response
+     * @return boolean
+     */
     public function isSuccessful($response): bool
     {
         if (! $response) {
@@ -98,26 +133,14 @@ class BaseAPIClient
         return (int) substr($response->getStatusCode(), 0, 1) === 2;
     }
 
-    protected function handleRequestError(ResponseInterface $response): void
+    
+    /**
+     *
+     * @return void
+     */
+    private function getConfigFromFile()
     {
-        ray($response);
-
-        if ($response->getStatusCode() === 422) {
-            throw new ValidationException(json_decode((string) $response->getBody(), true));
-        }
-
-        if ($response->getStatusCode() === 404) {
-            throw new NotFoundException();
-        }
-
-        if ($response->getStatusCode() === 400) {
-            throw new FailedActionException((string) $response->getBody());
-        }
-
-        if ($response->getStatusCode() === 401) {
-            throw new UnauthorizedException((string) $response->getBody());
-        }
-
-        throw new Exception((string) $response->getBody());
+        return include "./config/app.php";
     }
+
 }

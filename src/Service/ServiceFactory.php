@@ -17,7 +17,7 @@ class ServiceFactory extends AbstractServiceFactory
     public function __construct($client)
     {
         $this->client = $client;
-        self::$classMap = $this->importServicesFromConfig();
+        self::$classMap = $client->config['services'];
     }
 
     /**
@@ -31,22 +31,13 @@ class ServiceFactory extends AbstractServiceFactory
     }
 
     /**
-     *
-     * @return array<string, string>
-     */
-    public function importServicesFromConfig()
-    {
-        return (include "./config/app.php")['services'];
-    }
-
-    /**
      * @param string $name
      * @return null
      */
     public function __get(string $name)
     {
         $serviceClass = $this->getServiceClass($name);
-
+        
         if ($serviceClass !== null) {
             return new $serviceClass($this->client);
         }
