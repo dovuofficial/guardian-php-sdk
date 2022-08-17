@@ -1,6 +1,7 @@
 <?php
 
 use Dovu\GuardianPhpSdk\Service\AccountService;
+use Dovu\GuardianPhpSdk\Service\MrvService;
 use Dovu\GuardianPhpSdk\Service\PolicyService;
 
 return [
@@ -12,6 +13,7 @@ return [
     'services' => [
         'accounts' => AccountService::class,
         'policies' => PolicyService::class,
+        'mrv' => MrvService::class,
     ]
 
 ];

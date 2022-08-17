@@ -12,10 +12,12 @@ $sdk->setHmacSecret('1234567890');
 
 $user = $sdk->accounts->login('jon', 'secret');
 
-$registry = $sdk->accounts->login('dovuauthority', 'secret');
+$userDid = $user['data']['did'];
 
-$sdk->setApiToken($registry['data']['accessToken']);
 
-$did = $user['data']['did'];
+$verifier = $sdk->accounts->login('verifier', 'secret');
 
-$sdk->policies->approveApplication($policyId, $did);
+$sdk->setApiToken($verifier['data']['accessToken']);
+
+
+$sdk->mrv->approveMrvDocument($policyId, $userDid);

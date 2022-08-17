@@ -28,4 +28,10 @@ class PolicyService extends AbstractService
     {
         return $this->client->put("policies/{$policyId}/approve/application/{$did}");
     }
+
+    
+    public function approveProject(string $policyId, string $did)
+    {
+        return $this->client->put("policies/{$policyId}/approve/project/{$did}");
+    }
 }

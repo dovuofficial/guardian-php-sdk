@@ -10,8 +10,10 @@ $sdk = new DovuGuardianAPI;
 
 $sdk->setHmacSecret('1234567890');
 
-$user = $sdk->accounts->login('jon', 'secret');
+$user = $sdk->accounts->create('verifier', 'secret');
+
+$user = $sdk->accounts->login('verifier', 'secret');
 
 $sdk->setApiToken($user['data']['accessToken']);
 
-$sdk->accounts->role($policyId, 'registrant');
+$sdk->accounts->role($policyId, 'VERIFIER');

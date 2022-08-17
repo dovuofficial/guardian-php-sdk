@@ -18,4 +18,4 @@ $sdk->setApiToken($registry['data']['accessToken']);
 
 $did = $user['data']['did'];
 
-$sdk->policies->approveApplication($policyId, $did);
+$sdk->policies->approveProject($policyId, $did);
