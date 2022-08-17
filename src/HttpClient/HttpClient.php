@@ -2,23 +2,21 @@
 
 namespace Dovu\GuardianPhpSdk\HttpClient;
 
+use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
+use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
+use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
+use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
 use Exception;
 use GuzzleHttp\Client;
-use Psr\Http\Message\ResponseInterface;
-use Dovu\GuardianPhpSdk\HttpClient\Hmac;
 use GuzzleHttp\Exception\RequestException;
-use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
-use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
-use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
-use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
+use Psr\Http\Message\ResponseInterface;
 
 class HttpClient
 {
     protected array $hmac = [];
 
     public function __construct(private string $method)
-    {   
-        
+    {
     }
 
     /**
@@ -27,20 +25,17 @@ class HttpClient
      */
     public function request(string $uri)
     {
-
         $payload = $this->body;
 
-        if(!empty($this->hmac)){
-
+        if (! empty($this->hmac)) {
             $payload['headers'] = [
                 'x-date' => $this->hmac['x-date'],
                 'x-signature' => $this->hmac['x-signature'],
-                'x-content-sha256' => $this->hmac['x-content-sha256']
+                'x-content-sha256' => $this->hmac['x-content-sha256'],
             ];
-
         }
 
-        if (!empty($this->apiToken)) {
+        if (! empty($this->apiToken)) {
             $payload['headers']['Authorization'] = "Bearer {$this->apiToken}";
         }
 
@@ -59,16 +54,13 @@ class HttpClient
             $responseBody = (string) $response->getBody();
 
             return json_decode($responseBody, true) ?: $responseBody;
-
-        } catch(RequestException $e) {
-
+        } catch (RequestException $e) {
             trigger_error($e);
-
         }
     }
 
     /**
-     *      
+     *
      * @param string $token
      * @return void
      */
@@ -84,11 +76,10 @@ class HttpClient
      */
     public function withBaseUri(string $uri): self
     {
-
         $this->client = new Client([
             'base_uri' => $uri,
             'http_errors' => true,
-            'debug' => true
+            'debug' => true,
         ]);
 
         return $this;
@@ -127,17 +118,15 @@ class HttpClient
      */
     public function withHmac(string $url, array $body, string $secret): self
     {
-
         $this->hmac = (new Hmac($this->method, $url, $body, $secret))->get();
 
         return $this;
-        
     }
 
     /**
      *
      * @param [type] $response
-     * @return boolean
+     * @return bool
      */
     private function isSuccessful($response): bool
     {
@@ -155,7 +144,6 @@ class HttpClient
      */
     private function handleRequestError(ResponseInterface $response): void
     {
-
         if ($response->getStatusCode() === 422) {
             throw new ValidationException(json_decode((string) $response->getBody(), true));
         }

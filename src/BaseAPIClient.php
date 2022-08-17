@@ -3,6 +3,7 @@
 namespace Dovu\GuardianPhpSdk;
 
 use Dovu\GuardianPhpSdk\HttpClient\HttpClient;
+
 class BaseAPIClient
 {
     /** @var string */
@@ -11,8 +12,6 @@ class BaseAPIClient
     public string $hmacSecret = "";
 
     public array $config = [];
-
-
 
     public function __construct()
     {
@@ -31,7 +30,6 @@ class BaseAPIClient
         $this->apiToken = $apiToken;
     }
 
-
     /**
      *
      * @param string $secret
@@ -41,7 +39,6 @@ class BaseAPIClient
     {
         $this->hmacSecret = $secret;
     }
-
 
     /**
      *
@@ -55,10 +52,9 @@ class BaseAPIClient
                     ->withHmac($this->base_uri.$uri, [], $this->hmacSecret);
 
         $client->setApiToken($this->apiToken);
-                    
+
         return $client->request($uri);
     }
-
 
     /**
      *
@@ -79,14 +75,13 @@ class BaseAPIClient
         return $client->request($uri);
     }
 
-
     /**
      *
      * @param string $uri
      * @param [type] $payload
      * @return void
      */
-    public function postJson(string $uri, $payload )
+    public function postJson(string $uri, $payload)
     {
         $client = HttpClient::post()
                     ->withBaseUri($this->base_uri)
@@ -94,10 +89,9 @@ class BaseAPIClient
                     ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
 
         $client->setApiToken($this->apiToken);
-                    
+
         return $client->request($uri);
     }
-
 
     /**
      *
@@ -113,16 +107,14 @@ class BaseAPIClient
                     ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
 
         $client->setApiToken($this->apiToken);
-                    
+
         return $client->request($uri);
-
     }
-
 
     /**
      *
      * @param [type] $response
-     * @return boolean
+     * @return bool
      */
     public function isSuccessful($response): bool
     {
@@ -133,7 +125,6 @@ class BaseAPIClient
         return (int) substr($response->getStatusCode(), 0, 1) === 2;
     }
 
-    
     /**
      *
      * @return void
@@ -142,5 +133,4 @@ class BaseAPIClient
     {
         return include "./config/app.php";
     }
-
 }
