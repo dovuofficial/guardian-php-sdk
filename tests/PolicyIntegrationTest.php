@@ -121,6 +121,4 @@ it('SDK can process a given policy', function ($registration, $ecological_projec
     $response = $sdk->policies->submitProject($policy_id, $ecological_project);
 
     expect($response)->toBeEmpty();
-
-
 })->with('registration', 'ecological_project', 'agrecalc_mrv');

@@ -2,7 +2,7 @@
 
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 
-$sdk = new DovuGuardianAPI;
+$sdk = new DovuGuardianAPI();
 
 it('Check that the hmac amd api uri is set', function () use ($sdk) {
     $app = $sdk->config['app'];
