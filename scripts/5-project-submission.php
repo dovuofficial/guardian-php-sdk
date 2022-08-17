@@ -4,7 +4,7 @@ require('./vendor/autoload.php');
 
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 
-$policyId = '62fa59d271f8910e68012c6b';
+$policyId = '62fcc7e54d3979bff880545f';
 
 $document = '{
         "field0": "uuid",

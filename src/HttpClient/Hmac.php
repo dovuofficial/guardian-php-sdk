@@ -6,7 +6,6 @@ use Carbon\Carbon;
 
 class Hmac
 {
-
     private string $method;
     private string $hashedStr;
     private array  $url;
@@ -18,10 +17,7 @@ class Hmac
         string $url,
         array  $body = [],
         string $secret = ""
-    )
-    {
-
-
+    ) {
         $this->method = strtoupper($method);
 
         $this->url = parse_url($url);
@@ -33,7 +29,6 @@ class Hmac
         $this->hashedStr = $this->stringToSign();
 
         $this->signature = $this->createSignature($secret);
-
     }
 
     /**
@@ -56,19 +51,15 @@ class Hmac
      */
     private function stringToSign(): string
     {
-
-        if(! in_array($this->url['port'], [80, 443]))
-        {
+        if (! in_array($this->url['port'], [80, 443])) {
             $this->url['host'] .= ':' . $this->url['port'];
         }
 
-        $string =  "{$this->method}\n{$this->url['path']}\n{$this->date};{$this->url['host']}"; 
+        $string = "{$this->method}\n{$this->url['path']}\n{$this->date};{$this->url['host']}";
 
-        
-        if(!empty($this->hashedBody)){
 
+        if (! empty($this->hashedBody)) {
             $string .= ";{$this->hashedBody}";
-        
         }
 
         return $string;
@@ -96,8 +87,7 @@ class Hmac
     private function createSignature(string $secret): string
     {
         $hashhmac = hash_hmac('sha256', $this->hashedStr, $secret, true);
+
         return base64_encode($hashhmac);
     }
-
-
 }

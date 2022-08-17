@@ -4,7 +4,6 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 class AbstractService
 {
-
     protected $client;
 
     protected $config = [];

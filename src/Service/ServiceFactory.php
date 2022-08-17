@@ -37,7 +37,7 @@ class ServiceFactory extends AbstractServiceFactory
     public function __get(string $name)
     {
         $serviceClass = $this->getServiceClass($name);
-        
+
         if ($serviceClass !== null) {
             return new $serviceClass($this->client);
         }
