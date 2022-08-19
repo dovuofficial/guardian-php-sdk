@@ -19,7 +19,6 @@ class MrvService extends AbstractService
         return $this->client->postJson("policies/{$policyId}/mrv/agrecalc", $document);
     }
 
-
     /**
      *
      * @param string $policyId
@@ -34,7 +33,6 @@ class MrvService extends AbstractService
 
         return $this->client->postJson("policies/{$policyId}/mrv/cool-farm-tool", $document);
     }
-
 
     /**
      *

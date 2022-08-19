@@ -19,7 +19,6 @@ class PolicyService extends AbstractService
         return $this->client->postJson("policies/{$policyId}/register", $document);
     }
 
-
     /**
      *
      * @param string $policyId
@@ -30,7 +29,6 @@ class PolicyService extends AbstractService
     {
         return $this->client->put("policies/{$policyId}/approve/application/{$did}");
     }
-
 
     /**
      *
@@ -46,7 +44,6 @@ class PolicyService extends AbstractService
 
         return $this->client->postJson("policies/{$policyId}/project", $document);
     }
-
 
     /**
      *
