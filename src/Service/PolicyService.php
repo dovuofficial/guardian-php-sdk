@@ -4,6 +4,12 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 class PolicyService extends AbstractService
 {
+    /**
+     *
+     * @param string $policyId
+     * @param string $document
+     * @return void
+     */
     public function registerApplication(string $policyId, string $document)
     {
         if (! is_array($document)) {
@@ -13,6 +19,25 @@ class PolicyService extends AbstractService
         return $this->client->postJson("policies/{$policyId}/register", $document);
     }
 
+
+    /**
+     *
+     * @param string $policyId
+     * @param string $did
+     * @return void
+     */
+    public function approveApplication(string $policyId, string $did)
+    {
+        return $this->client->put("policies/{$policyId}/approve/application/{$did}");
+    }
+
+
+    /**
+     *
+     * @param string $policyId
+     * @param string $document
+     * @return void
+     */
     public function submitProject(string $policyId, string $document)
     {
         if (! is_array($document)) {
@@ -22,11 +47,13 @@ class PolicyService extends AbstractService
         return $this->client->postJson("policies/{$policyId}/project", $document);
     }
 
-    public function approveApplication(string $policyId, string $did)
-    {
-        return $this->client->put("policies/{$policyId}/approve/application/{$did}");
-    }
 
+    /**
+     *
+     * @param string $policyId
+     * @param string $did
+     * @return void
+     */
     public function approveProject(string $policyId, string $did)
     {
         return $this->client->put("policies/{$policyId}/approve/project/{$did}");

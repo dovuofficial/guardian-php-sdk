@@ -63,19 +63,30 @@ dataset('agrecalc_mrv', [
     ]),
 ]);
 
+
+dataset('coolfarm_mrv', [
+    json_encode([
+        "field0" => "Test MRV Field 1",
+        "field1" => 100,
+        "field2" => "Test MRV Field 3",
+        "field3" => 200,
+        "field4" => 300
+    ]),
+]);
+
 /**
  * Without going full PHPUnit it seems to be a challenge to move variables
  * between tests, in Laravel we'll rely on DB state between tests
  */
-it('SDK can process a given policy', function ($registration, $ecological_project, $mrv) {
+it('SDK can process a given policy', function ($registration, $ecological_project, $agrecalc_mrv, $coolfarm_mrv) {
     $sdk = new DovuGuardianAPI();
     $sdk->setHmacSecret($sdk->config['local']['hmac_secret']);
 
     // Step One is generating a user.
     $username = 'dovu_' . rand();
-    $response = $sdk->accounts->create($username, 'secret');
+    $registrant = $sdk->accounts->create($username, 'secret');
 
-    $user = $response['data'];
+    $user = $registrant['data'];
     $user_token = $user['accessToken'];
     $user_did = $user['did'];
 
@@ -102,8 +113,8 @@ it('SDK can process a given policy', function ($registration, $ecological_projec
     expect($response)->toBeEmpty();
 
     // Step four: approve a document through the standard registry
-    $response = $sdk->accounts->login('dovuauthority', 'secret');
-    $registry_token = $response['data']['accessToken'];
+    $registry = $sdk->accounts->login('dovuauthority', 'secret');
+    $registry_token = $registry['data']['accessToken'];
 
     // Set the API token for the context of the standard reg
     $sdk->setApiToken($registry_token);
@@ -121,4 +132,37 @@ it('SDK can process a given policy', function ($registration, $ecological_projec
     $response = $sdk->policies->submitProject($policy_id, $ecological_project);
 
     expect($response)->toBeEmpty();
-})->with('registration', 'ecological_project', 'agrecalc_mrv');
+
+
+    //step six: approve the ecological project
+    $sdk->setApiToken($registry_token);
+
+    $response = $sdk->policies->approveProject($policy_id, $user_did);
+
+    expect($response)->toBeEmpty();
+
+    //step seven: send mrv (coolfarm);
+    $sdk->setApiToken($user_token);
+
+    $response = $sdk->mrv->submitCoolFarmToolDocument($policy_id, $coolfarm_mrv);
+
+    //step eight: create verifier
+    $verifier_user = 'verifier_' . rand();
+
+    $verifier = $sdk->accounts->create($verifier_user, 'secret');
+
+    expect($verifier['data']['username'])->toBe($verifier_user);
+    expect($verifier['data']['did'])->toBeString();
+    expect($verifier['data']['role'])->toBe('USER');
+    expect($verifier['data']['accessToken'])->toBeString();
+
+    $sdk->setApiToken($verifier['data']['accessToken']);
+
+    $sdk->accounts->role($policy_id, 'VERIFIER');
+
+
+    //step nine: approve mrv (coolfarm)
+    $response = $sdk->mrv->approveMrvDocument($policy_id, $user_did);
+
+
+})->with('registration', 'ecological_project', 'agrecalc_mrv', 'coolfarm_mrv');
