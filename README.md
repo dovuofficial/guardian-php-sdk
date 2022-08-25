@@ -1,8 +1,8 @@
 # A PHP SDK to work with The Guardian
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/jonwood2/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/jonwood2/guardian-php-sdk)
-[![Tests](https://github.com/jonwood2/guardian-php-sdk/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/jonwood2/guardian-php-sdk/actions/workflows/run-tests.yml)
-[![Total Downloads](https://img.shields.io/packagist/dt/jonwood2/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/jonwood2/guardian-php-sdk)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/dovuofficial/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/dovuofficial/guardian-php-sdk)
+[![Tests](https://github.com/dovuofficial/guardian-php-sdk/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/dovuofficial/guardian-php-sdk/actions/workflows/run-tests.yml)
+[![Total Downloads](https://img.shields.io/packagist/dt/dovuofficial/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/dovuofficial/guardian-php-sdk)
 
 This SDK lets you perform API calls to Dovu's Guardian API middleware. Making working with Hedera Guardian more streamlined.
 
