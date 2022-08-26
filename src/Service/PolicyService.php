@@ -55,4 +55,15 @@ class PolicyService extends AbstractService
     {
         return $this->client->put("policies/{$policyId}/approve/project/{$did}");
     }
+
+    /**
+     *
+     * @param string $policyId
+     * @return void
+     */
+    public function trustChain(string $policyId)
+    {
+        return $this->client->get("policies/{$policyId}/trustchains");
+    }
+
 }

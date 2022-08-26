@@ -160,7 +160,14 @@ it('SDK can process a given policy', function ($registration, $ecological_projec
 
     $sdk->accounts->role($policy_id, 'VERIFIER');
 
-
     //step nine: approve mrv (coolfarm)
     $response = $sdk->mrv->approveMrvDocument($policy_id, $user_did);
+
+    //step ten: trustchain
+    $sdk->setApiToken($registry_token);
+
+    $trustchain = $sdk->policies->trustchain($policy_id);
+
+
+
 })->with('registration', 'ecological_project', 'agrecalc_mrv', 'coolfarm_mrv');

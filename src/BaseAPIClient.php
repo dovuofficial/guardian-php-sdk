@@ -45,7 +45,7 @@ class BaseAPIClient
      * @param string $uri
      * @return void
      */
-    protected function get(string $uri)
+    public function get(string $uri)
     {
         $client = HttpClient::get()
                     ->withBaseUri($this->base_uri)
