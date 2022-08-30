@@ -65,5 +65,4 @@ class PolicyService extends AbstractService
     {
         return $this->client->get("policies/{$policyId}/trustchains");
     }
-
 }

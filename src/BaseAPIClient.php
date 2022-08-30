@@ -28,7 +28,6 @@ class BaseAPIClient
         $this->apiToken = $apiToken;
     }
 
-
     public function setGuardianBaseUrl(string $url)
     {
         $this->baseUrl = $url;
@@ -136,6 +135,7 @@ class BaseAPIClient
     private function getConfigFromFile()
     {
         $path = dirname(__DIR__, 1);
+
         return include $path . "/config/app.php";
     }
 }
