@@ -19,6 +19,8 @@ composer require dovuofficial/guardian-php-sdk
 ```php
 $sdk = new Dovu\GuardianPhpSdk();
 
+$sdk->setGuardianBaseUrl('http://localhost:3001/api/');
+
 $sdk->setHmacSecret('hmac_secret');
 
 $response = $sdk->accounts->create('username','password');
