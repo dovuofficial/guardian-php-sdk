@@ -16,8 +16,6 @@ class BaseAPIClient
     public function __construct()
     {
         $this->config = $this->getConfigFromFile();
-
-        $this->base_uri = $this->config['app']['base_url'];
     }
 
     /**
@@ -28,6 +26,11 @@ class BaseAPIClient
     public function setApiToken(string $apiToken)
     {
         $this->apiToken = $apiToken;
+    }
+
+    public function setGuardianBaseUrl(string $url)
+    {
+        $this->baseUrl = $url;
     }
 
     /**
@@ -48,8 +51,8 @@ class BaseAPIClient
     public function get(string $uri)
     {
         $client = HttpClient::get()
-                    ->withBaseUri($this->base_uri)
-                    ->withHmac($this->base_uri.$uri, [], $this->hmacSecret);
+                    ->withBaseUri($this->baseUrl)
+                    ->withHmac($this->baseUrl.$uri, [], $this->hmacSecret);
 
         $client->setApiToken($this->apiToken);
 
@@ -65,9 +68,9 @@ class BaseAPIClient
     public function post(string $uri, array $payload = [])
     {
         $client = HttpClient::post()
-                    ->withBaseUri($this->base_uri)
+                    ->withBaseUri($this->baseUrl)
                     ->withBody(['form_params' => $payload])
-                    ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
+                    ->withHmac($this->baseUrl.$uri, $payload, $this->hmacSecret);
 
 
         $client->setApiToken($this->apiToken);
@@ -84,9 +87,9 @@ class BaseAPIClient
     public function postJson(string $uri, $payload)
     {
         $client = HttpClient::post()
-                    ->withBaseUri($this->base_uri)
+                    ->withBaseUri($this->baseUrl)
                     ->withBody(['json' => $payload])
-                    ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
+                    ->withHmac($this->baseUrl.$uri, $payload, $this->hmacSecret);
 
         $client->setApiToken($this->apiToken);
 
@@ -102,9 +105,9 @@ class BaseAPIClient
     public function put(string $uri, array $payload = [])
     {
         $client = HttpClient::put()
-                    ->withBaseUri($this->base_uri)
+                    ->withBaseUri($this->baseUrl)
                     ->withBody(['form_params' => $payload])
-                    ->withHmac($this->base_uri.$uri, $payload, $this->hmacSecret);
+                    ->withHmac($this->baseUrl.$uri, $payload, $this->hmacSecret);
 
         $client->setApiToken($this->apiToken);
 
@@ -131,6 +134,8 @@ class BaseAPIClient
      */
     private function getConfigFromFile()
     {
-        return include "./config/app.php";
+        $path = dirname(__DIR__, 1);
+
+        return include $path . "/config/app.php";
     }
 }

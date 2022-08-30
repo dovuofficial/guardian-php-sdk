@@ -8,6 +8,8 @@ $policyId = '62fcc7e54d3979bff880545f';
 
 $sdk = new DovuGuardianAPI;
 
+$sdk->setGuardianBaseUrl('http://localhost:3001/api/');
+
 $sdk->setHmacSecret('1234567890');
 
 $authority = $sdk->accounts->login('dovuauthority', 'secret');

@@ -27,6 +27,8 @@ $document = '{
 
 $sdk = new DovuGuardianAPI;
 
+$sdk->setGuardianBaseUrl('http://localhost:3001/api/');
+
 $sdk->setHmacSecret('1234567890');
 
 $user = $sdk->accounts->login('jon', 'secret');
