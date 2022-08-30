@@ -80,6 +80,9 @@ dataset('coolfarm_mrv', [
  */
 it('SDK can process a given policy', function ($registration, $ecological_project, $agrecalc_mrv, $coolfarm_mrv) {
     $sdk = new DovuGuardianAPI();
+
+    $sdk->setGuardianBaseUrl('http://localhost:3001/api/');
+
     $sdk->setHmacSecret($sdk->config['local']['hmac_secret']);
 
     // Step One is generating a user.
