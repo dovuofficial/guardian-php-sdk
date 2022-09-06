@@ -27,7 +27,7 @@ class HttpClient
     {
         $payload = $this->body;
 
-        if (! empty($this->hmac)) {
+        if (!empty($this->hmac)) {
             $payload['headers'] = [
                 'x-date' => $this->hmac['x-date'],
                 'x-signature' => $this->hmac['x-signature'],
@@ -35,28 +35,28 @@ class HttpClient
             ];
         }
 
+        $payload['headers']['Accept'] = 'application/json';
+        $payload['headers']['Content-Type'] = 'application/json';
+
         if (! empty($this->apiToken)) {
             $payload['headers']['Authorization'] = "Bearer {$this->apiToken}";
         }
 
 
-        try {
-            $response = $this->client->request(
-                strtoupper($this->method),
-                $uri,
-                $payload
-            );
+        $response = $this->client->request(
+            strtoupper($this->method),
+            $uri,
+            $payload
+        );
 
-            if (! $this->isSuccessful($response)) {
-                return $this->handleRequestError($response);
-            }
-
-            $responseBody = (string) $response->getBody();
-
-            return json_decode($responseBody, true) ?: $responseBody;
-        } catch (RequestException $e) {
-            trigger_error($e);
+        if (! $this->isSuccessful($response)) {
+            return $response;
         }
+
+        $responseBody = (string) $response->getBody();
+
+        return json_decode($responseBody, true) ?: $responseBody;
+      
     }
 
     /**
@@ -78,8 +78,8 @@ class HttpClient
     {
         $this->client = new Client([
             'base_uri' => $uri,
-            'http_errors' => true,
-            'debug' => true,
+            'http_errors' => false,
+            'debug' => false,
         ]);
 
         return $this;
