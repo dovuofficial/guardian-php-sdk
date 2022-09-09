@@ -35,8 +35,8 @@ class HttpClient
             ];
         }
 
-        $payload['headers']['Accept'] = 'application/json';
-        $payload['headers']['Content-Type'] = 'application/json';
+        // $payload['headers']['Accept'] = 'application/json';
+        // $payload['headers']['Content-Type'] = 'application/json';
 
         if (! empty($this->apiToken)) {
             $payload['headers']['Authorization'] = "Bearer {$this->apiToken}";
