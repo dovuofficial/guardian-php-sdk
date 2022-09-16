@@ -2,6 +2,8 @@
 
 All notable changes to `guardian-php-sdk` will be documented in this file.
 
+## 1.0.4 2022-09-16
+Fixed issue where a error was thrown dut to body being sent on a get request.
 
 ## 1.0.3 2022-09-09
 Fixed issue where not being able to login to guardian because of json headers.

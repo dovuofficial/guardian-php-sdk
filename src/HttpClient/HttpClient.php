@@ -25,7 +25,7 @@ class HttpClient
      */
     public function request(string $uri)
     {
-        $payload = $this->body;
+        $payload = $this->body ?? null;
 
         if (!empty($this->hmac)) {
             $payload['headers'] = [
@@ -34,9 +34,6 @@ class HttpClient
                 'x-content-sha256' => $this->hmac['x-content-sha256'],
             ];
         }
-
-        // $payload['headers']['Accept'] = 'application/json';
-        // $payload['headers']['Content-Type'] = 'application/json';
 
         if (! empty($this->apiToken)) {
             $payload['headers']['Authorization'] = "Bearer {$this->apiToken}";
