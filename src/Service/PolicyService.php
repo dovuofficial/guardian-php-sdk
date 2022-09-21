@@ -61,8 +61,12 @@ class PolicyService extends AbstractService
      * @param string $policyId
      * @return void
      */
-    public function trustChain(string $policyId)
+    public function trustChain(?string $policyId)
     {
+        if($policyId === null){
+            return [];
+        }
+
         return $this->client->get("policies/{$policyId}/trustchains");
     }
 }
