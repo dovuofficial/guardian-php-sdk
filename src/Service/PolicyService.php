@@ -69,4 +69,14 @@ class PolicyService extends AbstractService
 
         return $this->client->get("policies/{$policyId}/trustchains");
     }
+
+    /**
+     *
+     * @param string $policyId
+     * @return void
+     */
+    public function token(string $policyId)
+    {
+        return $this->client->get("policies/{$policyId}/token");
+    }
 }
