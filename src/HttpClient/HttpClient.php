@@ -8,7 +8,6 @@ use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
 use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
 use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpClient
@@ -27,7 +26,7 @@ class HttpClient
     {
         $payload = $this->body ?? null;
 
-        if (!empty($this->hmac)) {
+        if (! empty($this->hmac)) {
             $payload['headers'] = [
                 'x-date' => $this->hmac['x-date'],
                 'x-signature' => $this->hmac['x-signature'],
@@ -53,7 +52,6 @@ class HttpClient
         $responseBody = (string) $response->getBody();
 
         return json_decode($responseBody, true) ?: $responseBody;
-      
     }
 
     /**

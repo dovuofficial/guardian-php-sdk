@@ -63,7 +63,7 @@ class PolicyService extends AbstractService
      */
     public function trustChain(?string $policyId)
     {
-        if($policyId === null){
+        if ($policyId === null) {
             return [];
         }
 
