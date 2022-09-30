@@ -12,7 +12,7 @@ return [
     ],
 
     'local' => [
-        'policy_id' => '62fcc7e54d3979bff880545f',
+        'policy_id' => '632b33532e11b6094416fc14',
         'hmac_secret' => '1234567890',
     ],
 
