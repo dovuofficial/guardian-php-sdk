@@ -51,7 +51,7 @@ class Hmac
      */
     private function stringToSign(): string
     {
-        if (! in_array($this->url['port'], [80, 443])) {
+        if (isset($this->url['port']) && ! in_array($this->url['port'], [80, 443])) {
             $this->url['host'] .= ':' . $this->url['port'];
         }
 
