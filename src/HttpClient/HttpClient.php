@@ -45,13 +45,11 @@ class HttpClient
             $payload
         );
 
-        if (! $this->isSuccessful($response)) {
-            return $response;
-        }
+        $res['status_code'] = $response->getStatusCode();
+        $res['reason'] = $response->getReasonPhrase();
+        
+        return array_merge($res, json_decode((string) $response->getBody(), true));
 
-        $responseBody = (string) $response->getBody();
-
-        return json_decode($responseBody, true) ?: $responseBody;
     }
 
     /**
