@@ -2,6 +2,11 @@
 
 All notable changes to `guardian-php-sdk` will be documented in this file.
 
+## 1.0.9 2022-10-17
+Fixed issue where an array merge was sometimes merging null.
+
+## 1.0.8 2022-10-14
+Merged success and error into one unit so that unit is what gets returned.
 
 ## 1.0.5 2022-09-21
 Fixed issue where policyid was not being passed into the trustchain.
