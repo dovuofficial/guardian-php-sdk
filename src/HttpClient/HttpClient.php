@@ -48,11 +48,13 @@ class HttpClient
         $res['status_code'] = $response->getStatusCode();
         $res['reason'] = $response->getReasonPhrase();
 
-        if ($response->getBody()) {
-            return array_merge($res, json_decode((string) $response->getBody(), true));
-        }
+        $body = json_decode((string) $response->getBody(), true);
 
-        return $res;
+        if (is_null($body)) {
+            return $res;
+        }
+        
+        return array_merge($res, $body);
         
 
     }

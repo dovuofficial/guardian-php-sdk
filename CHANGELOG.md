@@ -1,7 +1,8 @@
 # Changelog
 
 All notable changes to `guardian-php-sdk` will be documented in this file.
-
+## 1.0.10 2022-10-17
+Update http client return - fixed issue where return was failing when body is null.
 ## 1.0.9 2022-10-17
 Fixed issue where an array merge was sometimes merging null.
 
