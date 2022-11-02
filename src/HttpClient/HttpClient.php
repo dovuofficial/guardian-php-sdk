@@ -66,10 +66,8 @@ class HttpClient
         if (is_null($body)) {
             return $res;
         }
-        
-        return array_merge($res, $body);
-        
 
+        return array_merge($res, $body);
     }
 
     /**
@@ -84,10 +82,10 @@ class HttpClient
 
     /**
      *
-     * @param boolean $throwErrors
+     * @param bool $throwErrors
      * @return void
      */
-    public function setThrowErrors(bool $throwErrors) : void
+    public function setThrowErrors(bool $throwErrors): void
     {
         $this->throwErrors = $throwErrors;
     }
@@ -194,8 +192,7 @@ class HttpClient
      */
     public static function __callStatic(string $method, array $args): mixed
     {
-
-        if (!in_array($method, self::$methods)) {
+        if (! in_array($method, self::$methods)) {
             throw new Exception('The method ' . $method . ' is not supported.');
         }
 

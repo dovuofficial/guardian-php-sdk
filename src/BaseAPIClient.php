@@ -45,10 +45,9 @@ class BaseAPIClient
         $this->hmacSecret = $secret;
     }
 
-
     /**
      *
-     * @param boolean $errors
+     * @param bool $errors
      * @return void
      */
     public function setThrowErrors(bool $errors = true): void
