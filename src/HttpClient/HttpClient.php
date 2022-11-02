@@ -13,6 +13,14 @@ use Psr\Http\Message\ResponseInterface;
 class HttpClient
 {
     protected array $hmac = [];
+    private string $apiToken;
+    private bool $throwErrors = true;
+
+    private static $methods = [
+        'get',
+        'post',
+        'put',
+    ];
 
     public function __construct(private string $method)
     {
@@ -45,6 +53,11 @@ class HttpClient
             $payload
         );
 
+
+        if (! $this->isSuccessful($response) && $this->throwErrors) {
+            return $this->handleRequestError($response);
+        }
+
         $res['status_code'] = $response->getStatusCode();
         $res['reason'] = $response->getReasonPhrase();
 
@@ -67,6 +80,16 @@ class HttpClient
     public function setApiToken(string $token): void
     {
         $this->apiToken = $token;
+    }
+
+    /**
+     *
+     * @param boolean $throwErrors
+     * @return void
+     */
+    public function setThrowErrors(bool $throwErrors) : void
+    {
+        $this->throwErrors = $throwErrors;
     }
 
     /**
@@ -149,7 +172,7 @@ class HttpClient
         }
 
         if ($response->getStatusCode() === 404) {
-            throw new NotFoundException();
+            throw new NotFoundException((string) $response->getBody());
         }
 
         if ($response->getStatusCode() === 400) {
@@ -157,7 +180,7 @@ class HttpClient
         }
 
         if ($response->getStatusCode() === 401) {
-            throw new UnauthorizedException((string) $response->getBody());
+            throw new UnauthorizedException((string) $response->getBody(), 401);
         }
 
         throw new Exception((string) $response->getBody());
@@ -171,6 +194,11 @@ class HttpClient
      */
     public static function __callStatic(string $method, array $args): mixed
     {
+
+        if (!in_array($method, self::$methods)) {
+            throw new Exception('The method ' . $method . ' is not supported.');
+        }
+
         return new HttpClient($method);
     }
 }

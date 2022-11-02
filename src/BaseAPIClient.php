@@ -11,6 +11,8 @@ class BaseAPIClient
 
     public string $hmacSecret = "";
 
+    public bool $throwErrors = true;
+
     public array $config = [];
 
     public function __construct()
@@ -41,6 +43,17 @@ class BaseAPIClient
     public function setHmacSecret(string $secret)
     {
         $this->hmacSecret = $secret;
+    }
+
+
+    /**
+     *
+     * @param boolean $errors
+     * @return void
+     */
+    public function setThrowErrors(bool $errors = true): void
+    {
+        $this->throwErrors = $errors;
     }
 
     /**
