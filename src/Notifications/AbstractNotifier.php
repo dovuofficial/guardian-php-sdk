@@ -11,9 +11,8 @@ abstract class AbstractNotifier
         $notifier = array_keys($notification)[0];
 
         return match ($notifier) {
-            'slack' =>  new SlackNotifier($notification[$notifier]),
+            'slack' => new SlackNotifier($notification[$notifier]),
         };
-        
     }
 
     abstract public function send(Exception $error): void;
