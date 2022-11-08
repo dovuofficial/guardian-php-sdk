@@ -6,8 +6,6 @@ use Exception;
 
 class SlackNotifier extends AbstractNotifier
 {
-    const SLACK_WEBHOOK = "https://hooks.slack.com/services/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";
-
     public function __construct(private $webhook)
     {
         
