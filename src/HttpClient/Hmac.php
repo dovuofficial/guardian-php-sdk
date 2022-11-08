@@ -48,7 +48,7 @@ class Hmac
 
     public static function getInstance(): Hmac
     {
-        if(empty(self::$instance)) {
+        if (empty(self::$instance)) {
             self::$instance = new Hmac();
         }
 

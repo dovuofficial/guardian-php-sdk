@@ -2,7 +2,6 @@
 
 namespace Dovu\GuardianPhpSdk\HttpClient;
 
-use Dovu\GuardianPhpSdk\Contracts\HmacInterface;
 use Dovu\GuardianPhpSdk\Contracts\HttpClientInterface;
 use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
 use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
@@ -36,7 +35,6 @@ class HttpClient implements HttpClientInterface
         ]);
     }
 
-
     public function request(string $uri)
     {
         $payload = $this->body ?? null;
@@ -62,7 +60,6 @@ class HttpClient implements HttpClientInterface
 
 
         try {
-
             if (! $this->isSuccessful($response) && $this->throwErrors) {
                 $this->handleRequestError($response);
             }
@@ -77,17 +74,13 @@ class HttpClient implements HttpClientInterface
             }
 
             return array_merge($res, $body);
-
         } catch (\Exception $e) {
-
             $notificationManager = new NotificationManager($this->settings);
             $notificationManager->register($e);
 
             return $e;
         }
     }
-
-
 
     public function get(string $uri): array|Exception
     {
@@ -98,16 +91,13 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-
-
     public function post(string $uri, array $payload = [], bool $jsonRequest = false): array|Exception
     {
-
         $this->method = "post";
 
         $this->body = ['form_params' => $payload];
 
-        if($jsonRequest) {
+        if ($jsonRequest) {
             $this->body = ['json' => $payload];
         }
 
@@ -115,8 +105,6 @@ class HttpClient implements HttpClientInterface
 
         return $this->request($uri);
     }
-
-
 
     public function put(string $uri, array $payload = []): array|Exception
     {
@@ -129,16 +117,13 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-
-
     private function setHmac(string $url, array $body = []): array
     {
         $hmac = Hmac::getInstance();
         $hmac->create($this->method, $this->baseUrl.$url, $body, $this->hmacSecret);
+
         return $hmac->get();
     }
-
-
 
     private function isSuccessful($response): bool
     {
@@ -148,8 +133,6 @@ class HttpClient implements HttpClientInterface
 
         return (int) substr($response->getStatusCode(), 0, 1) === 2;
     }
-
-
 
     private function handleRequestError(ResponseInterface $response): void
     {
@@ -173,5 +156,4 @@ class HttpClient implements HttpClientInterface
 
         throw new Exception((string) $response->getBody(), $statusCode);
     }
-
 }

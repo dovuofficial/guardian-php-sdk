@@ -8,7 +8,6 @@ class SlackNotifier extends AbstractNotifier
 {
     public function __construct(private $webhook)
     {
-        
     }
 
     public function send(Exception $error): void
@@ -22,7 +21,6 @@ class SlackNotifier extends AbstractNotifier
         curl_exec($c);
         curl_close($c);
     }
-
 
     private function formatMessage($errorMessage): array
     {
