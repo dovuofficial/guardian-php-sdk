@@ -16,7 +16,7 @@ class PolicyService extends AbstractService
             $document = json_decode($document, true);
         }
 
-        return $this->client->postJson("policies/{$policyId}/register", $document);
+        return $this->httpClient->post(uri: "policies/{$policyId}/register", payload: $document, jsonRequest: true);
     }
 
     /**
@@ -27,7 +27,7 @@ class PolicyService extends AbstractService
      */
     public function approveApplication(string $policyId, string $did)
     {
-        return $this->client->put("policies/{$policyId}/approve/application/{$did}");
+        return $this->httpClient->put("policies/{$policyId}/approve/application/{$did}");
     }
 
     /**
@@ -42,7 +42,7 @@ class PolicyService extends AbstractService
             $document = json_decode($document, true);
         }
 
-        return $this->client->postJson("policies/{$policyId}/project", $document);
+        return $this->httpClient->post(uri: "policies/{$policyId}/project", payload: $document, jsonRequest: true);
     }
 
     /**
@@ -53,7 +53,7 @@ class PolicyService extends AbstractService
      */
     public function approveProject(string $policyId, string $did)
     {
-        return $this->client->put("policies/{$policyId}/approve/project/{$did}");
+        return $this->httpClient->put("policies/{$policyId}/approve/project/{$did}");
     }
 
     /**
@@ -67,7 +67,7 @@ class PolicyService extends AbstractService
             return [];
         }
 
-        return $this->client->get("policies/{$policyId}/trustchains");
+        return $this->httpClient->get("policies/{$policyId}/trustchains");
     }
 
     /**
@@ -77,6 +77,6 @@ class PolicyService extends AbstractService
      */
     public function token(string $policyId)
     {
-        return $this->client->get("policies/{$policyId}/token");
+        return $this->httpClient->get("policies/{$policyId}/token");
     }
 }

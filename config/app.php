@@ -20,7 +20,7 @@ return [
         'accounts' => AccountService::class,
         'policies' => PolicyService::class,
         'mrv' => MrvService::class,
-    ]
+    ],
 
 ];
 

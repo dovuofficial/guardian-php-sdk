@@ -2,6 +2,8 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\HttpClient\HttpClient;
+
 /**
  * Service factory class for API resources.
  *
@@ -39,7 +41,7 @@ class ServiceFactory extends AbstractServiceFactory
         $serviceClass = $this->getServiceClass($name);
 
         if ($serviceClass !== null) {
-            return new $serviceClass($this->client);
+            return new $serviceClass(new HttpClient($this->client));
         }
 
         trigger_error('Undefined property: ' . static::class . '::$' . $name);
