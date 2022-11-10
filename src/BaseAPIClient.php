@@ -2,8 +2,6 @@
 
 namespace Dovu\GuardianPhpSdk;
 
-// use Dovu\GuardianPhpSdk\HttpClient\HttpClient;
-
 class BaseAPIClient
 {
     public string $apiToken = "";
