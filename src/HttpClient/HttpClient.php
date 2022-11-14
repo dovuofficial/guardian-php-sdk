@@ -2,26 +2,39 @@
 
 namespace Dovu\GuardianPhpSdk\HttpClient;
 
+use Dovu\GuardianPhpSdk\Contracts\HttpClientInterface;
 use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
 use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
 use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
 use Dovu\GuardianPhpSdk\Exceptions\ValidationException;
+use Dovu\GuardianPhpSdk\Notifications\NotificationManager;
 use Exception;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 
-class HttpClient
+class HttpClient implements HttpClientInterface
 {
     protected array $hmac = [];
+    private array $body;
+    private string $apiToken;
+    private bool $throwErrors;
+    private string $hmacSecret;
+    private string $baseUrl;
 
-    public function __construct(private string $method)
+    public function __construct(private $settings)
     {
+        $this->baseUrl = $settings->baseUrl;
+        $this->apiToken = $settings->apiToken;
+        $this->throwErrors = $settings->throwErrors;
+        $this->hmacSecret = $settings->hmacSecret;
+
+        $this->client = new Client([
+            'base_uri' => $settings->baseUrl,
+            'http_errors' => false,
+            'debug' => false,
+        ]);
     }
 
-    /**
-     * @param string $uri
-     * @return void
-     */
     public function request(string $uri)
     {
         $payload = $this->body ?? null;
@@ -45,89 +58,73 @@ class HttpClient
             $payload
         );
 
-        $res['status_code'] = $response->getStatusCode();
-        $res['reason'] = $response->getReasonPhrase();
 
-        $body = json_decode((string) $response->getBody(), true);
+        try {
+            if (! $this->isSuccessful($response) && $this->throwErrors) {
+                $this->handleRequestError($response);
+            }
 
-        if (is_null($body)) {
-            return $res;
+            $res['status_code'] = $response->getStatusCode();
+            $res['reason'] = $response->getReasonPhrase();
+
+            $body = json_decode((string) $response->getBody(), true);
+
+            if (is_null($body)) {
+                return $res;
+            }
+
+            return array_merge($res, $body);
+        } catch (\Exception $e) {
+            $notificationManager = new NotificationManager($this->settings);
+            $notificationManager->register($e);
+
+            return $e;
         }
-        
-        return array_merge($res, $body);
-        
-
     }
 
-    /**
-     *
-     * @param string $token
-     * @return void
-     */
-    public function setApiToken(string $token): void
+    public function get(string $uri): array|Exception
     {
-        $this->apiToken = $token;
+        $this->method = "get";
+
+        $this->hmac = $this->setHmac($uri);
+
+        return $this->request($uri);
     }
 
-    /**
-     *
-     * @param string $uri
-     * @return self
-     */
-    public function withBaseUri(string $uri): self
+    public function post(string $uri, array $payload = [], bool $jsonRequest = false): array|Exception
     {
-        $this->client = new Client([
-            'base_uri' => $uri,
-            'http_errors' => false,
-            'debug' => false,
-        ]);
+        $this->method = "post";
 
-        return $this;
+        $this->body = ['form_params' => $payload];
+
+        if ($jsonRequest) {
+            $this->body = ['json' => $payload];
+        }
+
+        $this->hmac = $this->setHmac($uri, $payload);
+
+        return $this->request($uri);
     }
 
-    /**
-     *
-     * @param array $headers
-     * @return self
-     */
-    public function withHeaders(array $headers): self
+    public function put(string $uri, array $payload = []): array|Exception
     {
-        $this->headers = $headers;
+        $this->method = "put";
 
-        return $this;
+        $this->body = ['form_params' => $payload];
+
+        $this->hmac = $this->setHmac($uri, $payload);
+
+        return $this->request($uri);
     }
 
-    /**
-     *
-     * @param array $body
-     * @return self
-     */
-    public function withBody(array $body): self
+    private function setHmac(string $url, array $body = []): array
     {
-        $this->body = $body;
+        $hmac = Hmac::getInstance();
+        $hmac->create($this->method, $this->baseUrl.$url, $body, $this->hmacSecret);
 
-        return $this;
+        return $hmac->get();
     }
 
-    /**
-     *
-     * @param string $url
-     * @param array $body
-     * @param string $secret
-     * @return self
-     */
-    public function withHmac(string $url, array $body, string $secret): self
-    {
-        $this->hmac = (new Hmac($this->method, $url, $body, $secret))->get();
-
-        return $this;
-    }
-
-    /**
-     *
-     * @param [type] $response
-     * @return bool
-     */
     private function isSuccessful($response): bool
     {
         if (! $response) {
@@ -137,40 +134,26 @@ class HttpClient
         return (int) substr($response->getStatusCode(), 0, 1) === 2;
     }
 
-    /**
-     *
-     * @param ResponseInterface $response
-     * @return void
-     */
     private function handleRequestError(ResponseInterface $response): void
     {
-        if ($response->getStatusCode() === 422) {
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode === 422) {
             throw new ValidationException(json_decode((string) $response->getBody(), true));
         }
 
-        if ($response->getStatusCode() === 404) {
-            throw new NotFoundException();
+        if ($statusCode === 404) {
+            throw new NotFoundException((string) $response->getBody(), $statusCode);
         }
 
-        if ($response->getStatusCode() === 400) {
-            throw new FailedActionException((string) $response->getBody());
+        if ($statusCode === 400) {
+            throw new FailedActionException((string) $response->getBody(), $statusCode);
         }
 
-        if ($response->getStatusCode() === 401) {
-            throw new UnauthorizedException((string) $response->getBody());
+        if ($statusCode === 401) {
+            throw new UnauthorizedException((string) $response->getBody(), $statusCode);
         }
 
-        throw new Exception((string) $response->getBody());
-    }
-
-    /**
-     *
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     */
-    public static function __callStatic(string $method, array $args): mixed
-    {
-        return new HttpClient($method);
+        throw new Exception((string) $response->getBody(), $statusCode);
     }
 }

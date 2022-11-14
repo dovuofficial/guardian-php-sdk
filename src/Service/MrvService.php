@@ -4,44 +4,26 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 class MrvService extends AbstractService
 {
-    /**
-     *
-     * @param string $policyId
-     * @param string $document
-     * @return void
-     */
     public function submitAgrecalcDocument(string $policyId, string $document)
     {
         if (! is_array($document)) {
             $document = json_decode($document, true);
         }
 
-        return $this->client->postJson("policies/{$policyId}/mrv/agrecalc", $document);
+        return $this->httpClient->post(uri: "policies/{$policyId}/mrv/agrecalc", payload: $document, jsonRequest: true);
     }
 
-    /**
-     *
-     * @param string $policyId
-     * @param string $document
-     * @return void
-     */
     public function submitCoolFarmToolDocument(string $policyId, string $document)
     {
         if (! is_array($document)) {
             $document = json_decode($document, true);
         }
 
-        return $this->client->postJson("policies/{$policyId}/mrv/cool-farm-tool", $document);
+        return $this->httpClient->post(uri: "policies/{$policyId}/mrv/cool-farm-tool", payload: $document, jsonRequest: true);
     }
 
-    /**
-     *
-     * @param [type] $policyId
-     * @param [type] $did
-     * @return void
-     */
-    public function approveMrvDocument($policyId, $did)
+    public function approveMrvDocument(string $policyId, string $did)
     {
-        return $this->client->put("policies/{$policyId}/approve/mrv/{$did}");
+        return $this->httpClient->put("policies/{$policyId}/approve/mrv/{$did}");
     }
 }

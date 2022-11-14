@@ -11,8 +11,9 @@ class Hmac
     private array  $url;
     private string $hashedBody;
     private string $signature;
+    private static Hmac $instance;
 
-    public function __construct(
+    public function create(
         string $method,
         string $url,
         array  $body = [],
@@ -43,6 +44,15 @@ class Hmac
             'x-content-sha256' => $this->hashedBody,
             'x-signature' => $this->signature,
         ];
+    }
+
+    public static function getInstance(): Hmac
+    {
+        if (empty(self::$instance)) {
+            self::$instance = new Hmac();
+        }
+
+        return self::$instance;
     }
 
     /**

@@ -6,7 +6,7 @@ class AccountService extends AbstractService
 {
     public function login($username, $password)
     {
-        return $this->client->post('accounts/login', [
+        return $this->httpClient->post('accounts/login', [
                 'username' => $username,
                 'password' => $password,
         ]);
@@ -14,7 +14,7 @@ class AccountService extends AbstractService
 
     public function create($username, $password)
     {
-        return $this->client->post('accounts', [
+        return $this->httpClient->post('accounts', [
                 'username' => $username,
                 'password' => $password,
         ]);
@@ -22,6 +22,6 @@ class AccountService extends AbstractService
 
     public function role($policyId, $roleType)
     {
-        return $this->client->post("policies/{$policyId}/role/{$roleType}");
+        return $this->httpClient->post("policies/{$policyId}/role/{$roleType}");
     }
 }

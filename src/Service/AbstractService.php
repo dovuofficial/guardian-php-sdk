@@ -2,14 +2,11 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\Contracts\HttpClientInterface;
+
 class AbstractService
 {
-    protected $client;
-
-    protected $config = [];
-
-    public function __construct($client)
+    public function __construct(protected HttpClientInterface $httpClient)
     {
-        $this->client = $client;
     }
 }
