@@ -14,6 +14,7 @@ abstract class AbstractNotifier
 
         return match ($notifier) {
             'slack' => new SlackNotifier($notification[$notifier]),
+            default => throw new \Exception('Notification type not found', 422),
         };
     }
 
