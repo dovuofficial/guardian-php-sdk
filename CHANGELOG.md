@@ -1,8 +1,16 @@
 # Changelog
 
 All notable changes to `guardian-php-sdk` will be documented in this file.
+
+## 1.1.1 2023-02-10
+Added general supply mrv route to MRV services.
+
+## 1.1.0 2022-11-29
+Added Notification system, currently able to add slack notifications on errors.
+
 ## 1.0.10 2022-10-17
 Update http client return - fixed issue where return was failing when body is null.
+
 ## 1.0.9 2022-10-17
 Fixed issue where an array merge was sometimes merging null.
 

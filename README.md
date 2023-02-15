@@ -23,6 +23,8 @@ $sdk->setGuardianBaseUrl('http://localhost:3001/api/');
 
 $sdk->setHmacSecret('hmac_secret');
 
+$sdk->addNotification(['slack' => 'https://hooks.slack.com/services/xxxxxxx']);
+
 $response = $sdk->accounts->create('username','password');
 $response = $sdk->accounts->login('username','password');
 ```
