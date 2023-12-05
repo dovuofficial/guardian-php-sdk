@@ -57,7 +57,6 @@ class PolicyService extends AbstractService
         return $this->httpClient->put("policies/{$policyId}/approval/sites/{$entityId}");
     }
 
-
     /**
      *
      * @param string $policyId
@@ -84,7 +83,6 @@ class PolicyService extends AbstractService
     {
         return $this->httpClient->put("policies/{$policyId}/approval/claims/{$entityId}");
     }
-
 
     /**
      *

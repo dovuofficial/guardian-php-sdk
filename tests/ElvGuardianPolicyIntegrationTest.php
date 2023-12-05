@@ -401,7 +401,8 @@ describe('Functional Guardian Test', function () {
 
     it("This is the end-to-end test from registrant account creation to minting", function ($project, $site, $claim) {
 
-        $username = 'dovu_' . rand();        $registrant = $this->helper->createNewUser($username, 'secret');
+        $username = 'dovu_' . rand();
+        $registrant = $this->helper->createNewUser($username, 'secret');
 
         $supplier_token = $registrant['data']['accessToken'];
 
