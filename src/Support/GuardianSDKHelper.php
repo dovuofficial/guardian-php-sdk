@@ -29,7 +29,7 @@ class GuardianSDKHelper
     public function __construct(DovuGuardianAPI $sdk, string $policyId = null)
     {
         $this->sdk = $sdk;
-        $this->policyId = $policyId || $sdk->config['local']['policy_id'];
+        $this->policyId = $policyId ?? $sdk->config['local']['policy_id'];
     }
 
     public function setApiKey($token): void
@@ -42,7 +42,7 @@ class GuardianSDKHelper
         $this->sdk->accounts->role($this->policyId, $role->value);
     }
 
-    public function accessTokenForRegistry($username = 'dovuauthority', $password = 'test')
+    public function accessTokenForRegistry($username = 'dovuauthority', $password = 'secret')
     {
         return $this->getAccessToken($username, $password);
     }
