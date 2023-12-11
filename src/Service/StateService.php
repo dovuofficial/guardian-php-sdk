@@ -42,7 +42,7 @@ class StateService extends AbstractService
     /**
      *  Example usage:
      *      $sdk->state
-     *          ->filters([ 'field0' => 'uuid' ])
+     *          ->filters([ 'uuid' => 'uuid' ])
      *          ->status(EntityStatus::WAITING)
      *          ->query($this->policyId, $query);
      * @param array $filters
