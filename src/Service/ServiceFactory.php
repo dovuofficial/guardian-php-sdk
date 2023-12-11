@@ -2,6 +2,7 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\HttpClient\HttpClient;
 
 /**
@@ -16,7 +17,9 @@ class ServiceFactory extends AbstractServiceFactory
      */
     private static array $classMap = [];
 
-    public function __construct($client)
+    private DovuGuardianAPI $client;
+
+    public function __construct(DovuGuardianAPI $client)
     {
         $this->client = $client;
         self::$classMap = $client->config['services'];

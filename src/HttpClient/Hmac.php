@@ -13,6 +13,8 @@ class Hmac
     private string $signature;
     private static Hmac $instance;
 
+    private ?string $date;
+
     public function create(
         string $method,
         string $url,

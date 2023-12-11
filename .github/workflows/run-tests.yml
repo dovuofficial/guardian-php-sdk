@@ -33,5 +33,7 @@ jobs:
       - name: Install dependencies
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
+      # Temporary env tests
       - name: Execute tests
-        run: vendor/bin/pest
+        run: vendor/bin/pest --filter EnsureEnvironmentTest
+

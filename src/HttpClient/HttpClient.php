@@ -2,6 +2,7 @@
 
 namespace Dovu\GuardianPhpSdk\HttpClient;
 
+use Dovu\GuardianPhpSdk\Constants\HttpMethod;
 use Dovu\GuardianPhpSdk\Contracts\HttpClientInterface;
 use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
 use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
@@ -20,6 +21,9 @@ class HttpClient implements HttpClientInterface
     private bool $throwErrors;
     private string $hmacSecret;
     private string $baseUrl;
+    private Client $client;
+
+    private HttpMethod $method;
 
     public function __construct(private $settings)
     {
@@ -53,11 +57,10 @@ class HttpClient implements HttpClientInterface
 
 
         $response = $this->client->request(
-            strtoupper($this->method),
+            strtoupper($this->method->value),
             $uri,
             $payload
         );
-
 
         try {
             if (! $this->isSuccessful($response) && $this->throwErrors) {
@@ -84,7 +87,7 @@ class HttpClient implements HttpClientInterface
 
     public function get(string $uri): array|Exception
     {
-        $this->method = "get";
+        $this->method = HttpMethod::GET;
 
         $this->hmac = $this->setHmac($uri);
 
@@ -93,7 +96,7 @@ class HttpClient implements HttpClientInterface
 
     public function post(string $uri, array $payload = [], bool $jsonRequest = false): array|Exception
     {
-        $this->method = "post";
+        $this->method = HttpMethod::POST;
 
         $this->body = ['form_params' => $payload];
 
@@ -108,7 +111,7 @@ class HttpClient implements HttpClientInterface
 
     public function put(string $uri, array $payload = []): array|Exception
     {
-        $this->method = "put";
+        $this->method = HttpMethod::PUT;
 
         $this->body = ['form_params' => $payload];
 
@@ -120,7 +123,7 @@ class HttpClient implements HttpClientInterface
     private function setHmac(string $url, array $body = []): array
     {
         $hmac = Hmac::getInstance();
-        $hmac->create($this->method, $this->baseUrl.$url, $body, $this->hmacSecret);
+        $hmac->create($this->method->value, $this->baseUrl.$url, $body, $this->hmacSecret);
 
         return $hmac->get();
     }
