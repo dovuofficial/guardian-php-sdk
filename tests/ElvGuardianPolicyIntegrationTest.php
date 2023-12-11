@@ -25,56 +25,56 @@ use Ramsey\Uuid\Uuid;
 
 dataset('project', [
     json_encode([
-        "field0" => Uuid::uuid4(),
-        "field1" => "CARBON_REDUCTION",
-        "field3" => "Illum commodi quidem dolorem voluptatibus.",
-        "field4" => "Porro qui error earum quia iure praesentium molestiae.",
-        "field5" => "Aut necessitatibus voluptatem quae nemo reiciendis officia et aperiam quia.",
-        "field6" => "Quia maiores vel et reprehenderit eius fugiat quae nihil.",
-        "field7" => "Aliquid et sint sint assumenda nostrum eum.",
-        "field8" => "Quia explicabo dolorum minima perspiciatis suscipit odit explicabo aut amet.",
-        "field9" => [ "Field 9" ],
+        "uuid" => Uuid::uuid4(),
+        "field0" => "Sustainable End of Life Vehicle Scrapping Program",
+        "field1" => "This is completed through digitizing of blended UN e-waste methodology (AMS-III.BA) and UN Recovery and recycling of materials from solid wastes (AMS-III.AJ) and applying it to end-of-life vehicles for tracking emission avoidance. Introducing a new unit type for selling credits to enhance market transparency and traceability. These units, termed ELV Credit, represents the environmental impact of processing each End of Life Vehicle (ELV) through Government Authorized Vehicle Scrapping Centers, which are termed Registered Vehicle Scrapping Facility (RVSFs) in India.",
+        "field2" => "CARBON_REDUCTION",
+        "field3" => "India",
+        "field4" => "Technological Emission Avoidance",
+        "field5" => "UNFCCC Third Party Verified Blended Methodologies: AMS-III.BA.: Recovery and recycling of materials from E-waste (v3.0) &AMS-III.AJ: Recovery and recycling of materials from solid wastes (v7.0)",
+        "field6" => "01 August 2022",
+        "field7" => [ "https://cdm.unfccc.int/methodologies/DB/TO0E8JPL9361FDB1IPF0TUPS0WJXV3", "https://cdm.unfccc.int/methodologies/DB/R22750M155F84YR0D4YVYOS0CLSCII" ],
     ]),
 ]);
 
 dataset('site', [
     json_encode([
-        "field0" => Uuid::uuid4(),
-        "field1" => "Name of Site",
-        "field2" => "Address of site",
-        "field3" => "Name of POC",
-        "field5" => "Number of POC",
-        "field4" => "[0,0]",
+        "uuid" => Uuid::uuid4(),
+        "field0" => "MTC BUSINESS PRIVATE LIMITED",
+        "field1" => "PLOT NO - 559, BOL GIDC, SANAND - 2 IND ESTATE, SANAND, 382111",
+//        "field3" => "Name of POC",
+//        "field5" => "Number of POC",
+//        "field4" => "[0,0]",
     ]),
 ]);
 
 dataset('claim', [
     json_encode([
-        "field0" => Uuid::uuid4(),
-        "field1" => "1233",
-        "field2" => "IPFS",
-        "field3" => "1.2",
-        "field6" => 2023,
-        "field4" => [
+        "uuid" => Uuid::uuid4(),
+        "field0" => "Certificate of Deposit",
+        "field1" => "COD2023062PB10DN1161",
+        "field2" => "https://cloudflare-ipfs.com/ipfs/bafybeiafql4r5xn6nyuamktltmjnklapiyck5w6mtpx7pragvhtr56iase/COD1161.pdf",
+        "field3" => "1.58735",
+        "field4" => 2023,
+        "field5" => [
             "field0" => [
-                "field0" => 1,
-                "field1" => 2,
-                "field2" => 3,
-                "field3" => 3,
-                "field4" => 3,
-                "field5" => 3,
-                "field6" => 3,
-                "field7" => 3,
-                "field8" => 3,
-                "field9" => 3,
+                "field0" => 1.802,
+                "field1" => 0.1855,
+                "field2" => 0.0265,
+                "field3" => 0.265,
+                "field4" => 0.0795,
+                "field5" => 0.1325,
+                "field6" => 0,
+                "field7" => 0.0795,
+                "field8" => 0,
             ],
             "field1" => [
-                "field0" => "1",
-                "field1" => 2,
-                "field2" => "Registration No.",
-                "field3" => "3",
-                "field4" => "Certificate of Deposit",
-                "field5" => "4",
+                "field0" => "Registration Number",
+                "field1" => "PB10DN1161",
+                "field2" => "LMV/Motor Car",
+                "field3" => "2650",
+                "field4" => "Others",
+                "field5" => "Diesel",
             ],
         ],
     ]),
@@ -99,6 +99,7 @@ dataset('claim', [
 describe('Functional Guardian Test', function () {
     beforeEach(function () {
         $sdk = new DovuGuardianAPI();
+        $sdk->setHmacSecret('1234567890');
         $sdk->setGuardianBaseUrl($sdk->config['app']['base_url']);
 
         $this->helper = new GuardianSDKHelper($sdk);
@@ -428,7 +429,7 @@ describe('Functional Guardian Test', function () {
 
         expect($result->status_code)->toBe(200);
 
-        $project_uuid = json_decode($project, true)['field0'];
+        $project_uuid = json_decode($project, true)['uuid'];
 
         /**
          * Waiting query for the registry to scan for the newly created project
@@ -466,7 +467,7 @@ describe('Functional Guardian Test', function () {
 
         expect($result->status_code)->toBe(200);
 
-        $site_uuid = json_decode($site, true)['field0'];
+        $site_uuid = json_decode($site, true)['uuid'];
 
         /**
          * Waiting query for the registry to approve a site from an approved project
@@ -518,7 +519,7 @@ describe('Functional Guardian Test', function () {
         // This will eventually be a waiting query to check the verifier exists
         sleep(20);
 
-        $claim_uuid = json_decode($claim, true)['field0'];
+        $claim_uuid = json_decode($claim, true)['uuid'];
 
         /**
          * Waiting query for the verifier to approve a claim from a supplier
