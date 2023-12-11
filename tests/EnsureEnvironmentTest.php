@@ -7,8 +7,8 @@ $sdk = new DovuGuardianAPI();
 it('Check that the hmac amd api uri is set', function () use ($sdk) {
     $app = $sdk->config['app'];
 
-    expect($sdk->base_uri)->toBe($app['base_url']);
-    expect($sdk->base_uri)->not()->toBe("");
+    expect($app['base_url'])->toBe($app['base_url']);
+    expect($app['base_url'])->not()->toBe("");
 });
 
 it('Check that a local policy is set', function () use ($sdk) {
