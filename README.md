@@ -49,11 +49,11 @@ $this->helper->setApiKey($supplier_token);
 $this->helper->setRole(GuardianRole::SUPPLIER);
 
 // With a $project json 
-$project = [ 'field0' => \Ramsey\Uuid\Uuid::uuid4(), 'field1' => 'data' ];
+$project = [ 'uuid' => \Ramsey\Uuid\Uuid::uuid4(), 'field1' => 'data' ];
 
 $result = (object) $this->helper->createProject($project);
 
-$project_uuid = json_decode($project, true)['field0'];
+$project_uuid = json_decode($project, true)['uuid'];
 
 /**
  * Waiting query for the registry to scan for the newly created project
