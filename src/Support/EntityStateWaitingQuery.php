@@ -8,7 +8,7 @@ use Dovu\GuardianPhpSdk\Constants\StateQuery;
 
 class EntityStateWaitingQuery
 {
-    public const DEFAULT_FILTER_KEY = 'field0';
+    public const DEFAULT_FILTER_KEY = 'uuid';
 
     /**
      * For now, we will assume we are looking for a single key field to filter
