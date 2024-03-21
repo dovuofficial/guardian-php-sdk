@@ -64,7 +64,7 @@ class GuardianSDKHelper
 
     public function createNewUser($username = '', $password = 'test')
     {
-        return $this->sdk->accounts->create($username, 'secret');
+        return $this->sdk->accounts->create($username, $password);
     }
 
     public function queryWaiting(StateQuery $query)
