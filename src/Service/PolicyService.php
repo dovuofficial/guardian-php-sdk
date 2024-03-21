@@ -2,6 +2,8 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Exception;
+
 class PolicyService extends AbstractService
 {
     /**
@@ -50,9 +52,9 @@ class PolicyService extends AbstractService
      *
      * @param string $policyId
      * @param string $entityId
-     * @return void
+     * @return array|Exception
      */
-    public function approveSite(string $policyId, string $entityId)
+    public function approveSite(string $policyId, string $entityId): array|Exception
     {
         return $this->httpClient->put("policies/{$policyId}/approval/sites/{$entityId}");
     }
@@ -79,7 +81,7 @@ class PolicyService extends AbstractService
      * @param string $entityId
      * @return array|\Exception
      */
-    public function approveClaim(string $policyId, string $entityId)
+    public function approveClaim(string $policyId, string $entityId): array|Exception
     {
         return $this->httpClient->put("policies/{$policyId}/approval/claims/{$entityId}");
     }
@@ -87,15 +89,15 @@ class PolicyService extends AbstractService
     /**
      *
      * @param string $policyId
-     * @return void
+     * @return array|\Exception
      */
-    public function trustChain(?string $policyId)
+    public function trustChain(?string $policyId): array|Exception
     {
         if ($policyId === null) {
             return [];
         }
 
-        return $this->httpClient->get("policies/{$policyId}/trustchains");
+            return $this->httpClient->get("policies/{$policyId}/trustchains");
     }
 
     /**
@@ -103,7 +105,7 @@ class PolicyService extends AbstractService
      * @param string $policyId
      * @return void
      */
-    public function token(string $policyId)
+    public function token(string $policyId): array|Exception
     {
         return $this->httpClient->get("policies/{$policyId}/token");
     }
