@@ -14,7 +14,6 @@ class PolicyService extends AbstractService
         return (object) $this->httpClient->get("policies/{$id}");
     }
 
-
     /**
      *
      * @param string $policyId

@@ -20,6 +20,7 @@ class PolicyContext
     {
         return new self($sdk);
     }
+
     public function for(string $policy_id): self
     {
         $this->policyId = $policy_id;
