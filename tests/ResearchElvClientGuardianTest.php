@@ -265,7 +265,7 @@ describe('Functional Guardian Test', function () {
         $this->policy_mode->dryRun();
 
         // TODO: Uncomment this to restart dry run state before assertions (in case of errors)
-//         $this->dry_run_scenario->restart();
+        //         $this->dry_run_scenario->restart();
 
         $updated_users = $this->dry_run_scenario->createUser();
 
@@ -293,9 +293,9 @@ describe('Functional Guardian Test', function () {
 
 
 
-//        $this->dry_run_scenario->restart();
+        //        $this->dry_run_scenario->restart();
 
-//        $this->policy_mode->draft();
+        //        $this->policy_mode->draft();
     });//->skip();
 
 

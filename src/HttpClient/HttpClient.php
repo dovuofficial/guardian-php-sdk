@@ -69,13 +69,13 @@ class HttpClient implements HttpClientInterface
 
             $body = (string) $response->getBody();
 
-//            if (is_bool((bool) $body)) {
-//                return [
-//                    "result" => $body,
-//                ];
-//            }
-//            $res['status_code'] = $response->getStatusCode();
-//            $res['reason'] = $response->getReasonPhrase();
+            //            if (is_bool((bool) $body)) {
+            //                return [
+            //                    "result" => $body,
+            //                ];
+            //            }
+            //            $res['status_code'] = $response->getStatusCode();
+            //            $res['reason'] = $response->getReasonPhrase();
 
             return json_decode((string) $response->getBody(), true);
 
