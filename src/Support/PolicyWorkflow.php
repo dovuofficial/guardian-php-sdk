@@ -27,9 +27,9 @@ class PolicyWorkflow
     {
 
         // TODO: WIP
-//        $block = $this->context->block-fromTag($this->context->policyId, $tag);
-//
-//        ray($block);
+        //        $block = $this->context->block-fromTag($this->context->policyId, $tag);
+        //
+        //        ray($block);
 
         return $this->context->block->dataByTag($this->context->policyId, $tag);
     }
