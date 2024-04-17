@@ -67,16 +67,23 @@ class HttpClient implements HttpClientInterface
                 $this->handleRequestError($response);
             }
 
-            $res['status_code'] = $response->getStatusCode();
-            $res['reason'] = $response->getReasonPhrase();
+            $body = (string) $response->getBody();
 
-            $body = json_decode((string) $response->getBody(), true);
+//            if (is_bool((bool) $body)) {
+//                return [
+//                    "result" => $body,
+//                ];
+//            }
+//            $res['status_code'] = $response->getStatusCode();
+//            $res['reason'] = $response->getReasonPhrase();
+
+            return json_decode((string) $response->getBody(), true);
 
             if (is_null($body)) {
-                return $res;
+                return [];
             }
 
-            return array_merge($res, $body);
+            return array_merge([], $body);
         } catch (\Exception $e) {
             $notificationManager = new NotificationManager($this->settings);
             $notificationManager->register($e);
@@ -85,7 +92,7 @@ class HttpClient implements HttpClientInterface
         }
     }
 
-    public function get(string $uri): array|Exception
+    public function get(string $uri): bool|array|Exception
     {
         $this->method = HttpMethod::GET;
 
@@ -94,7 +101,7 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function post(string $uri, array $payload = [], bool $jsonRequest = false): array|Exception
+    public function post(string $uri, array $payload = [], bool $jsonRequest = false): bool|array|Exception
     {
         $this->method = HttpMethod::POST;
 
@@ -109,7 +116,7 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function put(string $uri, array $payload = []): array|Exception
+    public function put(string $uri, array $payload = []): bool|array|Exception
     {
         $this->method = HttpMethod::PUT;
 
