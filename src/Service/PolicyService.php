@@ -4,6 +4,17 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 class PolicyService extends AbstractService
 {
+    public function all(): array
+    {
+        return $this->httpClient->get('policies');
+    }
+
+    public function get($id): object
+    {
+        return (object) $this->httpClient->get("policies/{$id}");
+    }
+
+
     /**
      *
      * @param string $policyId
