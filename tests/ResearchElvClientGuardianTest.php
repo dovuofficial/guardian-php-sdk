@@ -104,7 +104,7 @@ describe('Functional Guardian Test', function () {
         $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
 
         // mmcm elv
-        $policy_id = "661d52b7e641c9bef4f65566";
+        $policy_id = "6633615cf14d4f12d437f9eb";
 
         $context = PolicyContext::using($this->sdk)->for($policy_id);
 
@@ -255,48 +255,114 @@ describe('Functional Guardian Test', function () {
         $this->policy_mode->draft();
     })->skip();
 
-    it('A dry-run policy can create user, with a role, and submit project data', function ($project) {
+    it('A dry-run policy can create user, with a role, and submit project data -- read data from filter + ensure status', function ($project) {
 
-        $token = $this->helper->accessTokenForRegistry();
+        /**
+         * 1. Authenticate as registry
+         */
+        $this->helper->authenticateAsRegistry();
 
-        $this->helper->setApiKey($token);
-
-        // TODO: This is inconsistent due to guardian HTTP timeout issues
-        $this->policy_mode->dryRun();
-
-        // TODO: Uncomment this to restart dry run state before assertions (in case of errors)
-        //         $this->dry_run_scenario->restart();
-
-        $updated_users = $this->dry_run_scenario->createUser();
-
-        $user = (object) end($updated_users);
-
-        $this->dry_run_scenario->login($user->did);
-
-        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
-
-        // Send data to block
-        // These tags will be referenced as constants
-        $tag = "create_ecological_project";
-
-        $document = json_decode($project, true);
-
-        $project_response = $this->policy_workflow->sendDocumentToTag($tag, $document);
-
-        ray($project_response);
-
-        ray($updated_users);
-
-        $this->dry_run_scenario->login($updated_users[0]['did']);
-
-        ray($this->policy_workflow->dataByTag("supplier_grid"));
-
-
-
+        /**
+         * 2. Ensure dry run and (possible) restart state
+         */
+        //        $this->policy_mode->dryRun();
         //        $this->dry_run_scenario->restart();
 
-        //        $this->policy_mode->draft();
+        /**
+         * 3. Creating a new user in dry run state where a role is assigned.
+         */
+        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+        $user = (object) end($users);
+        $this->dry_run_scenario->login($user->did);
+        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+
+        /**
+         * 4. Prepare document
+         */
+        $document = json_decode($project, true);
+        $uuid = $document['uuid'];
+
+        /**
+         * 5. Send document to the correct tag
+         */
+        $tag = "create_ecological_project";
+        $this->policy_workflow->sendDocumentToTag($tag, $document);
+
+        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
+        sleep(2);
+
+        /**
+         * 6. As the "Administrator" filter and fetch the valid block
+         */
+        // As standard authority (first in the list of dry run users)
+        $this->dry_run_scenario->login($users[0]['did']);
+
+        // This is stateful in API.
+        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
+
+        $supplier = $this->policy_workflow->dataByTagToBlock("supplier_grid");
+
+        /**
+         * Ensure that the expected uuid matches the filter
+         */
+        expect($supplier->uuid)->toBe($uuid);
+
+        /**
+         * Ensure that the expected status matches state
+         */
+        expect($supplier->getStatus())->toBe("Waiting for approval");
+
+        /**
+         * Later: Reset policy state
+         */
+        // $this->dry_run_scenario->restart();
+        // $this->policy_mode->draft();
     });//->skip();
+
+
+    //    it('A dry-run policy can create user, with a role, and submit project data', function ($project) {
+    //
+    //        $token = $this->helper->accessTokenForRegistry();
+    //
+    //        $this->helper->setApiKey($token);
+    //
+    //        // TODO: This is inconsistent due to guardian HTTP timeout issues
+    //        $this->policy_mode->dryRun();
+    //
+    //        // TODO: Uncomment this to restart dry run state before assertions (in case of errors)
+    //        //         $this->dry_run_scenario->restart();
+    //
+    //        $updated_users = $this->dry_run_scenario->createUser();
+    ////        $users = $this->dry_run_scenario->users();
+    //
+    //        $user = (object) end($updated_users);
+    //
+    //        $this->dry_run_scenario->login($user->did);
+    //
+    //        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+    //
+    //        // Send data to block
+    //        // These tags will be referenced as constants
+    //            $tag = "create_ecological_project";
+    //
+    //            $document = json_decode($project, true);
+    //
+    //            $project_response = $this->policy_workflow->sendDocumentToTag($tag, $document);
+    //
+    //        ray($project_response);
+    //
+    //        ray($updated_users);
+    //
+    //        $this->dry_run_scenario->login($updated_users[0]['did']);
+    //
+    //        sleep(10);
+    //
+    //        ray($this->policy_workflow->dataByTag("supplier_grid"));
+    //
+    ////                $this->dry_run_scenario->restart();
+    //
+    //        //        $this->policy_mode->draft();
+    //    })->skip();
 
 
 
