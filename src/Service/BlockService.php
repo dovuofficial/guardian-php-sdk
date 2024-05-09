@@ -3,12 +3,31 @@
 namespace Dovu\GuardianPhpSdk\Service;
 
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
+use Dovu\GuardianPhpSdk\Domain\Block;
 
 class BlockService extends AbstractService
 {
     public function dataByTag(string $policyId, string $tag): object
     {
         return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks");
+    }
+
+    public function dataByTagToBlock(string $policyId, string $tag): Block
+    {
+        $data = $this->dataByTag($policyId, $tag);
+
+        return new Block($data);
+    }
+
+    // Might not work due to tag instead of blocks
+    public function filterByTag(string $policyId, string $tag, string $uuid): object
+    {
+        // TODO: This anomaly should be removed later as the Guardian needs to manually reset filterable state related to a new filter.
+        $this->dataByTag($policyId, $tag);
+
+        return (object) $this->httpClient->post("policies/{$policyId}/tag/{$tag}/blocks", [
+            'filterValue' => $uuid,
+        ], true);
     }
 
     public function dataById(string $policyId, string $id): object
