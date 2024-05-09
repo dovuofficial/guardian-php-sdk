@@ -47,6 +47,12 @@ class GuardianSDKHelper
         return $this->getAccessToken($username, $password);
     }
 
+    public function authenticateAsRegistry(): void
+    {
+        $token = $this->accessTokenForRegistry();
+        $this->setApiKey($token);
+    }
+
     public function accessTokenForSupplier($username = 'supplier', $password = 'secret')
     {
         return $this->getAccessToken($username, $password);
