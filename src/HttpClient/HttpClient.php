@@ -92,7 +92,7 @@ class HttpClient implements HttpClientInterface
         }
     }
 
-    public function get(string $uri): bool|array|Exception
+    public function get(string $uri): bool|array|Exception|null
     {
         $this->method = HttpMethod::GET;
 
@@ -101,7 +101,7 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function post(string $uri, array $payload = [], bool $jsonRequest = false): bool|array|Exception
+    public function post(string $uri, array $payload = [], bool $jsonRequest = false): bool|array|Exception|null
     {
         $this->method = HttpMethod::POST;
 
@@ -116,7 +116,7 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function put(string $uri, array $payload = []): bool|array|Exception
+    public function put(string $uri, array $payload = []): bool|array|Exception|null
     {
         $this->method = HttpMethod::PUT;
 
