@@ -3,6 +3,7 @@
 namespace Dovu\GuardianPhpSdk\Support;
 
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
+use Dovu\GuardianPhpSdk\Domain\Block;
 
 /**
  * The policy workflow only cares about retrieving and submitting data from/to blocks.
@@ -25,13 +26,18 @@ class PolicyWorkflow
 
     public function dataByTag($tag): object
     {
-
-        // TODO: WIP
-//        $block = $this->context->block-fromTag($this->context->policyId, $tag);
-//
-//        ray($block);
-
         return $this->context->block->dataByTag($this->context->policyId, $tag);
+    }
+
+    public function dataByTagToBlock($tag): Block
+    {
+        return $this->context->block->dataByTagToBlock($this->context->policyId, $tag);
+    }
+
+    // TODO: Expect current filter to be a externally generated uuid. (policy defined)
+    public function filterByTag($tag, $uuid): object
+    {
+        return $this->context->block->filterByTag($this->context->policyId, $tag, $uuid);
     }
 
     public function assignRole(GuardianRole $role): bool
