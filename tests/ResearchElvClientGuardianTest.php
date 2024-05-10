@@ -44,9 +44,9 @@ dataset('site', [
         "uuid" => Uuid::uuid4(),
         "field0" => "MTC BUSINESS PRIVATE LIMITED",
         "field1" => "PLOT NO - 559, BOL GIDC, SANAND - 2 IND ESTATE, SANAND, 382111",
-//        "field3" => "Name of POC",
-//        "field5" => "Number of POC",
-//        "field4" => "[0,0]",
+        "field2" => "Name of POC",
+        "field3" => "Number of POC",
+        "field4" => "[0,0]",
     ]),
 ]);
 
@@ -317,52 +317,307 @@ describe('Functional Guardian Test', function () {
          */
         // $this->dry_run_scenario->restart();
         // $this->policy_mode->draft();
+    })->skip();
+
+    it('A dry-run policy can create user, with a role, and submit project data -- then the registry can approve state (then check valid)', function ($project) {
+
+        /**
+         * 1. Authenticate as registry
+         */
+        $this->helper->authenticateAsRegistry();
+
+        /**
+         * 2. Ensure dry run and (possible) restart state
+         */
+        //        $this->policy_mode->dryRun();
+        //        $this->dry_run_scenario->restart();
+
+        /**
+         * 3. Creating a new user in dry run state where a role is assigned.
+         */
+        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+        $user = (object) end($users);
+        $this->dry_run_scenario->login($user->did);
+        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+
+        /**
+         * 4. Prepare document
+         */
+        $document = json_decode($project, true);
+        $uuid = $document['uuid'];
+
+        /**
+         * 5. Send document to the correct tag
+         */
+        $tag = "create_ecological_project";
+        $this->policy_workflow->sendDocumentToTag($tag, $document);
+
+        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
+        sleep(2);
+
+        /**
+         * 6. As the "Administrator" filter and fetch the valid block
+         */
+        // As standard authority (first in the list of dry run users)
+        $this->dry_run_scenario->login($users[0]['did']);
+
+        // This is stateful in API.
+        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
+
+        $supplier = $this->policy_workflow->dataByTagToBlock("supplier_grid");
+
+        /**
+         * 7. With the button submit the approval as an administrator
+         */
+        $supplier->updateStatus("Approved");
+
+        $option_tag = "Option_0";
+        $supplier->assignTag($option_tag);
+
+        /**
+         * Ensure that the expected status matches state before registry submission
+         */
+        expect($supplier->getStatus())->toBe("Approved");
+        expect($supplier->getTag())->toBe($option_tag);
+
+        $tag = "approve_supplier_btn";
+        $this->policy_workflow->sendDataToTag($tag, $supplier->forDocumentSubmission());
+
+        // This is stateful in API. (probably redundant in this case -- but for parallel usage.
+        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
+
+        $supplier = $this->policy_workflow->dataByTagToBlock("supplier_grid");
+
+        expect($supplier->getStatus())->toBe("Approved");
+
+        /**
+         * Later: Reset policy state
+         */
+        // $this->dry_run_scenario->restart();
+        // $this->policy_mode->draft();
+    })->skip();
+
+    it('A dry-run policy after status change can expect data for a site', function ($project, $site, $claim) {
+
+        /**
+         * 1. Authenticate as registry
+         */
+        $this->helper->authenticateAsRegistry();
+
+        /**
+         * 2. Ensure dry run and (possible) restart state
+         */
+        //        $this->policy_mode->dryRun();
+        //        $this->dry_run_scenario->restart();
+
+        /**
+         * 3. Creating a new user in dry run state where a role is assigned.
+         * TODO: refine this code.
+         */
+        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+        $user = (object) end($users);
+        $this->dry_run_scenario->login($user->did);
+        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+
+        /**
+         * 4. Prepare document
+         */
+        $document = json_decode($project, true);
+        $uuid = $document['uuid'];
+
+        /**
+         * 5. Send document to the correct tag
+         */
+        $tag = "create_ecological_project";
+        $this->policy_workflow->sendDocumentToTag($tag, $document);
+
+        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
+        sleep(2);
+
+        /**
+         * 6. As the "Administrator" filter and fetch the valid block
+         */
+        // As standard authority (first in the list of dry run users)
+        $admin = $users[0]['did'];
+
+        $this->dry_run_scenario->login($admin);
+
+        // This is stateful in API.
+        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
+
+        $supplier = $this->policy_workflow->dataByTagToFilterBlock("supplier_grid");
+
+        /**
+         * 7. With the button submit the project approval as an administrator
+         */
+        $supplier->updateStatus("Approved");
+
+        $option_tag = "Option_0";
+        $supplier->assignTag($option_tag);
+
+        $tag = "approve_supplier_btn";
+        $this->policy_workflow->sendDataToTag($tag, $supplier->forDocumentSubmission());
+
+        sleep(2);
+
+        $this->dry_run_scenario->login($user->did);
+
+        $supplier = $this->policy_workflow->dataByTagToDocumentBlock("create_site_form");
+
+        /**
+         * 8. Prepare site document
+         */
+        $document = json_decode($site, true);
+        $uuid = $document['uuid'];
+
+        // As the supplier user from before.
+        $this->dry_run_scenario->login($user->did);
+
+        /**
+         * 9. Send site document to the correct tag using previous doc as reference.
+         */
+        $tag = "create_site_form";
+        $referred_doc = $supplier->forNewDocumentReference($document);
+
+        $this->policy_workflow->sendDataToTag($tag, $referred_doc);
+
+        sleep(2);
+
+        /**
+         * 10. As the "Administrator" filter and fetch the valid block
+         */
+        // As standard authority (first in the list of dry run users -- admin)
+        $this->dry_run_scenario->login($admin);
+
+        // This is stateful in API.
+        $this->policy_workflow->filterByTag("site_grid_owner_filter", $uuid);
+
+        $site = $this->policy_workflow->dataByTagToFilterBlock("approve_sites_grid");
+
+        /**
+         * Ensure that the expected uuid matches the filter
+         */
+        expect($site->uuid)->toBe($uuid);
+
+        /**
+         * Ensure that the expected status matches state
+         */
+        expect($site->getStatus())->toBe("Waiting for approval");
+
+        /**
+         * 10. As the "Administrator" approve the site
+         */
+        $site->updateStatus("Approved");
+
+        $option_tag = "Option_0";
+        $site->assignTag($option_tag);
+
+        /**
+         * Ensure that the expected status matches state before registry site approve
+         */
+        expect($site->getStatus())->toBe("Approved");
+        expect($site->getTag())->toBe($option_tag);
+
+        $tag = "approve_site_button";
+
+        $this->policy_workflow->sendDataToTag($tag, $site->forDocumentSubmission());
+
+        $this->policy_workflow->filterByTag("site_grid_owner_filter", $uuid);
+
+        $site = $this->policy_workflow->dataByTagToFilterBlock("approve_sites_grid");
+
+        expect($site->getStatus())->toBe("Approved");
+
+        sleep(2);
+
+        /**
+         * 11. As the "Supplier" create a new "claim" related to the site.
+         */
+
+        $document = json_decode($claim, true);
+        $claim_uuid = $document['uuid'];
+
+        // As the supplier user from before.
+        $this->dry_run_scenario->login($user->did);
+
+        // Site uuid
+        $this->policy_workflow->filterByTag("site_grid_supplier_filter", $uuid);
+
+        $claim = $this->policy_workflow->dataByTagToFilterBlock("sites_grid");
+
+        $tag = "create_claim_request_form";
+        $referred_doc = $claim->forNewDocumentReference($document);
+
+        $this->policy_workflow->sendDataToTag($tag, $referred_doc);
+
+        sleep(2);
+
+        /**
+         * 12. As a new "verifier" filter and fetch the valid claim block
+         */
+
+        // Create verifier
+        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+        $verifier = (object) end($users);
+
+        // Assign role
+        $this->dry_run_scenario->login($verifier->did);
+        $this->policy_workflow->assignRole(GuardianRole::VERIFIER);
+
+        // This is stateful in API.
+        $this->policy_workflow->filterByTag("claim_request_verifier_filter", $claim_uuid);
+
+        $claim = $this->policy_workflow->dataByTagToFilterBlock("claim_requests_grid(verifier)");
+
+        /**
+         * Ensure that the expected uuid matches the filter
+         */
+        expect($claim->uuid)->toBe($claim_uuid);
+
+        /**
+         * Ensure that the expected status matches state
+         */
+        expect($claim->getStatus())->toBe("Waiting for approval");
+
+        /**
+         * 12. As a new "verifier" approve the claim for minting
+         */
+
+        /**
+         * 10. As the "Administrator" approve the site
+         */
+        $claim->updateStatus("Approved");
+
+        $option_tag = "Option_0";
+        $claim->assignTag($option_tag);
+
+        expect($claim->getStatus())->toBe("Approved");
+        expect($claim->getTag())->toBe($option_tag);
+
+        $tag = "approve_claim_requests_btn";
+
+        // TODO: this approval isn't working
+        $this->policy_workflow->sendDataToTag($tag, $claim->forDocumentSubmission());
+
+        sleep(2);
+
+        $this->policy_workflow->filterByTag("claim_request_verifier_filter", $claim_uuid);
+        $claim = $this->policy_workflow->dataByTagToFilterBlock("claim_requests_grid(verifier)");
+
+        ray($claim_uuid);
+        ray($claim);
+
+        expect($claim->getStatus())->toBe("Approved");
+
+        // TODO: asset should mint!
+
+        /**
+         * Later: Reset policy state
+         */
+        // $this->dry_run_scenario->restart();
+        // $this->policy_mode->draft();
     });//->skip();
 
-
-    //    it('A dry-run policy can create user, with a role, and submit project data', function ($project) {
-    //
-    //        $token = $this->helper->accessTokenForRegistry();
-    //
-    //        $this->helper->setApiKey($token);
-    //
-    //        // TODO: This is inconsistent due to guardian HTTP timeout issues
-    //        $this->policy_mode->dryRun();
-    //
-    //        // TODO: Uncomment this to restart dry run state before assertions (in case of errors)
-    //        //         $this->dry_run_scenario->restart();
-    //
-    //        $updated_users = $this->dry_run_scenario->createUser();
-    ////        $users = $this->dry_run_scenario->users();
-    //
-    //        $user = (object) end($updated_users);
-    //
-    //        $this->dry_run_scenario->login($user->did);
-    //
-    //        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
-    //
-    //        // Send data to block
-    //        // These tags will be referenced as constants
-    //            $tag = "create_ecological_project";
-    //
-    //            $document = json_decode($project, true);
-    //
-    //            $project_response = $this->policy_workflow->sendDocumentToTag($tag, $document);
-    //
-    //        ray($project_response);
-    //
-    //        ray($updated_users);
-    //
-    //        $this->dry_run_scenario->login($updated_users[0]['did']);
-    //
-    //        sleep(10);
-    //
-    //        ray($this->policy_workflow->dataByTag("supplier_grid"));
-    //
-    ////                $this->dry_run_scenario->restart();
-    //
-    //        //        $this->policy_mode->draft();
-    //    })->skip();
 
 
 
