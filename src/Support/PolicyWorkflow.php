@@ -3,7 +3,6 @@
 namespace Dovu\GuardianPhpSdk\Support;
 
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
-use Dovu\GuardianPhpSdk\Domain\Block;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
 use Dovu\GuardianPhpSdk\Domain\FilterVerifiableCredentialBlock;
 
