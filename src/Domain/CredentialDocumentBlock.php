@@ -23,8 +23,10 @@ class CredentialDocumentBlock
     {
         /**
          * This is the difference between a "requestVcDocumentBlock" and an "interface(filter)SourceBlock" should be simpler
+         *
+         * So the data from a block is a single "item" or first from the list.
          */
-        $this->block_data = $block_data->data;
+        $this->block_data = $block_data->data['0'] ?? $block_data->data;
 
         // TODO: Add safety checks for extracting object
         $this->credential_subject = (object) $this->block_data['document']['credentialSubject']['0'];
@@ -51,6 +53,11 @@ class CredentialDocumentBlock
         return $this->block_data;
     }
 
+    /**
+     * Provides a structure for document mutation, like approvals from a separate actor.
+     *
+     * @return array
+     */
     public function forDocumentSubmission(): array
     {
         return [
@@ -59,11 +66,18 @@ class CredentialDocumentBlock
         ];
     }
 
-    public function forNewDocumentReference($document): array
+    /**
+     * Provides a structure to chain in the current document as a reference to a future document within the workflow. This would cover all submissions of documents,
+     * where two parts workflow need to be connected, Like creating a new site using the previous "project" as a reference.
+     *
+     * @param $document
+     * @return array
+     */
+    public function chainDocumentAsReference($document): array
     {
         return [
             'document' => $document,
-//            'tag' => $this->tag,
+            'tag' => $this->tag,
             'ref' => $this->block_data,
         ];
     }
