@@ -9,8 +9,8 @@ namespace Dovu\GuardianPhpSdk\Constants;
  */
 enum GuardianRole: string
 {
-    case REGISTRY = 'STANDARD_REGISTRY';
     case SUPPLIER = 'Supplier';
-    case USER = 'USER';
     case VERIFIER = 'Verifier';
+    case USER = 'USER';
+    case REGISTRY = 'STANDARD_REGISTRY';
 }
