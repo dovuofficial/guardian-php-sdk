@@ -4,7 +4,6 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
-use Dovu\GuardianPhpSdk\Domain\FilterVerifiableCredentialBlock;
 
 class BlockService extends AbstractService
 {
@@ -13,14 +12,6 @@ class BlockService extends AbstractService
         return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks");
     }
 
-    public function dataByTagToFilterBlock(string $policyId, string $tag): FilterVerifiableCredentialBlock
-    {
-        $data = $this->dataByTag($policyId, $tag);
-
-        return new FilterVerifiableCredentialBlock($data);
-    }
-
-    // TODO: Too Verbose ATN
     public function dataByTagToCredentialBlock(string $policyId, string $tag): CredentialDocumentBlock
     {
         $data = $this->dataByTag($policyId, $tag);
@@ -52,15 +43,6 @@ class BlockService extends AbstractService
     public function sendToTag(string $policyId, string $tag, $data): object
     {
         return (object) $this->httpClient->post("policies/{$policyId}/tag/{$tag}/blocks", (array) $data, true);
-    }
-
-    public function sendDocumentToTag(string $policyId, $tag, array $data): object
-    {
-        $document = [
-            'document' => $data,
-        ];
-
-        return $this->sendToTag($policyId, $tag, $document);
     }
 
     public function assignRole(string $policyId, GuardianRole $role)
