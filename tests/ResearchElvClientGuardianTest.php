@@ -1,5 +1,7 @@
 <?php
 
+use Dovu\GuardianPhpSdk\Constants\EntityStatus;
+use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
@@ -124,8 +126,6 @@ describe('Functional Guardian Test', function () {
 
         $session = $this->sdk->accounts->session();
 
-        expect($session->status_code)->toBeTruthy();
-        expect($session->reason)->toBeTruthy();
         expect($session->_id)->toBeTruthy();
         expect($session->id)->toBeTruthy();
         expect($session->createDate)->toBeTruthy();
@@ -138,8 +138,11 @@ describe('Functional Guardian Test', function () {
         expect($session->walletToken)->toBe('');
         expect($session->role)->toBe(GuardianRole::REGISTRY->value);
         expect($session->refreshToken)->toBeTruthy();
-    })->skip(); // Done.
+    });
 
+    /**
+     * TODO: Ensure valid HTTP Status codes for conflict of current user.
+     */
     it('A user cannot be registered', function () {
 
         // 'test' -> 123456
@@ -160,25 +163,16 @@ describe('Functional Guardian Test', function () {
 
         $register = $this->sdk->accounts->register($username, '123456', GuardianRole::USER);
 
-        ray($register);
-
         expect($register->username)->toBeTruthy();
         expect($register->password)->toBeTruthy();
         expect($register->did)->toBeFalsy();
         expect($register->role)->toBe(GuardianRole::USER->value);
-
-        $login = $this->sdk->accounts->login($username, '123456');
-
-        ray($login);
-
-    })->skip();
+    });
 
 
     it('A policy can be toggled between dry run and draft modes', function () {
 
-        $token = $this->helper->accessTokenForRegistry();
-
-        $this->helper->setApiKey($token);
+        $this->helper->authenticateAsRegistry();
 
         expect($this->policy_mode->hasPolicyStatus(PolicyStatus::DRAFT))->toBeTruthy();
 
@@ -194,9 +188,7 @@ describe('Functional Guardian Test', function () {
 
     it('A policy can create users and view them in dry run', function () {
 
-        $token = $this->helper->accessTokenForRegistry();
-
-        $this->helper->setApiKey($token);
+        $this->helper->authenticateAsRegistry();
 
         // TODO: This is inconsistent due to guardian HTTP timeout issues
         $this->policy_mode->dryRun();
@@ -222,9 +214,7 @@ describe('Functional Guardian Test', function () {
 
     it('A dry-run policy can create user and assign a role', function () {
 
-        $token = $this->helper->accessTokenForRegistry();
-
-        $this->helper->setApiKey($token);
+        $this->helper->authenticateAsRegistry();
 
         // TODO: This is inconsistent due to guardian HTTP timeout issues
         $this->policy_mode->dryRun();
@@ -255,148 +245,6 @@ describe('Functional Guardian Test', function () {
         $this->policy_mode->draft();
     })->skip();
 
-    it('A dry-run policy can create user, with a role, and submit project data -- read data from filter + ensure status', function ($project) {
-
-        /**
-         * 1. Authenticate as registry
-         */
-        $this->helper->authenticateAsRegistry();
-
-        /**
-         * 2. Ensure dry run and (possible) restart state
-         */
-        //        $this->policy_mode->dryRun();
-        //        $this->dry_run_scenario->restart();
-
-        /**
-         * 3. Creating a new user in dry run state where a role is assigned.
-         */
-        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
-        $user = (object) end($users);
-        $this->dry_run_scenario->login($user->did);
-        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
-
-        /**
-         * 4. Prepare document
-         */
-        $document = json_decode($project, true);
-        $uuid = $document['uuid'];
-
-        /**
-         * 5. Send document to the correct tag
-         */
-        $tag = "create_ecological_project";
-        $this->policy_workflow->sendDocumentToTag($tag, $document);
-
-        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
-        sleep(2);
-
-        /**
-         * 6. As the "Administrator" filter and fetch the valid block
-         */
-        // As standard authority (first in the list of dry run users)
-        $this->dry_run_scenario->login($users[0]['did']);
-
-        // This is stateful in API.
-        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
-
-        $supplier = $this->policy_workflow->dataByTagToBlock("supplier_grid");
-
-        /**
-         * Ensure that the expected uuid matches the filter
-         */
-        expect($supplier->uuid)->toBe($uuid);
-
-        /**
-         * Ensure that the expected status matches state
-         */
-        expect($supplier->getStatus())->toBe("Waiting for approval");
-
-        /**
-         * Later: Reset policy state
-         */
-        // $this->dry_run_scenario->restart();
-        // $this->policy_mode->draft();
-    })->skip();
-
-    it('A dry-run policy can create user, with a role, and submit project data -- then the registry can approve state (then check valid)', function ($project) {
-
-        /**
-         * 1. Authenticate as registry
-         */
-        $this->helper->authenticateAsRegistry();
-
-        /**
-         * 2. Ensure dry run and (possible) restart state
-         */
-        //        $this->policy_mode->dryRun();
-        //        $this->dry_run_scenario->restart();
-
-        /**
-         * 3. Creating a new user in dry run state where a role is assigned.
-         */
-        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
-        $user = (object) end($users);
-        $this->dry_run_scenario->login($user->did);
-        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
-
-        /**
-         * 4. Prepare document
-         */
-        $document = json_decode($project, true);
-        $uuid = $document['uuid'];
-
-        /**
-         * 5. Send document to the correct tag
-         */
-        $tag = "create_ecological_project";
-        $this->policy_workflow->sendDocumentToTag($tag, $document);
-
-        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
-        sleep(2);
-
-        /**
-         * 6. As the "Administrator" filter and fetch the valid block
-         */
-        // As standard authority (first in the list of dry run users)
-        $this->dry_run_scenario->login($users[0]['did']);
-
-        // This is stateful in API.
-        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
-
-        $supplier = $this->policy_workflow->dataByTagToBlock("supplier_grid");
-
-        /**
-         * 7. With the button submit the approval as an administrator
-         */
-        $supplier->updateStatus("Approved");
-
-        $option_tag = "Option_0";
-        $supplier->assignTag($option_tag);
-
-        /**
-         * Ensure that the expected status matches state before registry submission
-         */
-        expect($supplier->getStatus())->toBe("Approved");
-        expect($supplier->getTag())->toBe($option_tag);
-
-        $tag = "approve_supplier_btn";
-        $this->policy_workflow->sendDataToTag($tag, $supplier->forDocumentSubmission());
-
-        // This is stateful in API. (probably redundant in this case -- but for parallel usage.
-        $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
-
-        $supplier = $this->policy_workflow->dataByTagToBlock("supplier_grid");
-
-        expect($supplier->getStatus())->toBe("Approved");
-
-        /**
-         * Later: Reset policy state
-         */
-        // $this->dry_run_scenario->restart();
-        // $this->policy_mode->draft();
-    })->skip();
-
     it('A dry-run policy after status change can expect data for a site', function ($project, $site, $claim) {
 
         /**
@@ -412,7 +260,7 @@ describe('Functional Guardian Test', function () {
 
         /**
          * 3. Creating a new user in dry run state where a role is assigned.
-         * TODO: refine this code.
+         * TODO: Create class on user creation with a role.
          */
         $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
         $user = (object) end($users);
@@ -422,14 +270,14 @@ describe('Functional Guardian Test', function () {
         /**
          * 4. Prepare document
          */
-        $document = json_decode($project, true);
-        $uuid = $document['uuid'];
+        $project = json_decode($project, true);
+        $uuid = $project['uuid'];
 
         /**
          * 5. Send document to the correct tag
          */
         $tag = "create_ecological_project";
-        $this->policy_workflow->sendDocumentToTag($tag, $document);
+        $this->policy_workflow->sendDocumentToTag($tag, $project);
 
         // TODO: Use the listener logic (This will increase based off of the current resource load on API)
         sleep(2);
@@ -444,16 +292,31 @@ describe('Functional Guardian Test', function () {
 
         // This is stateful in API.
         $this->policy_workflow->filterByTag("supplier_grid_filter", $uuid);
+        $supplier = $this->policy_workflow->dataByTagToDocumentBlock("supplier_grid");
 
-        $supplier = $this->policy_workflow->dataByTagToFilterBlock("supplier_grid");
+        /**
+         * Ensure that the expected uuid matches the filter
+         */
+        expect($supplier->uuid)->toBe($uuid);
+
+        /**
+         * Ensure that the expected status matches state
+         */
+        expect($supplier->getStatus())->toBe(EntityStatus::WAITING->value);
 
         /**
          * 7. With the button submit the project approval as an administrator
          */
-        $supplier->updateStatus("Approved");
+        $supplier->updateStatus(EntityStatus::APPROVED->value);
 
-        $option_tag = "Option_0";
+        $option_tag = GuardianApprovalOption::APPROVE->value;
         $supplier->assignTag($option_tag);
+
+        /**
+         * Ensure that the expected status matches state before registry submission
+         */
+        expect($supplier->getStatus())->toBe(EntityStatus::APPROVED->value);
+        expect($supplier->getTag())->toBe($option_tag);
 
         $tag = "approve_supplier_btn";
         $this->policy_workflow->sendDataToTag($tag, $supplier->forDocumentSubmission());
@@ -464,11 +327,13 @@ describe('Functional Guardian Test', function () {
 
         $supplier = $this->policy_workflow->dataByTagToDocumentBlock("create_site_form");
 
+        expect($supplier->getStatus())->toBe(EntityStatus::APPROVED->value);
+
         /**
          * 8. Prepare site document
          */
-        $document = json_decode($site, true);
-        $uuid = $document['uuid'];
+        $site = json_decode($site, true);
+        $uuid = $site['uuid'];
 
         // As the supplier user from before.
         $this->dry_run_scenario->login($user->did);
@@ -477,7 +342,7 @@ describe('Functional Guardian Test', function () {
          * 9. Send site document to the correct tag using previous doc as reference.
          */
         $tag = "create_site_form";
-        $referred_doc = $supplier->forNewDocumentReference($document);
+        $referred_doc = $supplier->chainDocumentAsReference($site);
 
         $this->policy_workflow->sendDataToTag($tag, $referred_doc);
 
@@ -492,7 +357,7 @@ describe('Functional Guardian Test', function () {
         // This is stateful in API.
         $this->policy_workflow->filterByTag("site_grid_owner_filter", $uuid);
 
-        $site = $this->policy_workflow->dataByTagToFilterBlock("approve_sites_grid");
+        $site = $this->policy_workflow->dataByTagToDocumentBlock("approve_sites_grid");
 
         /**
          * Ensure that the expected uuid matches the filter
@@ -502,20 +367,20 @@ describe('Functional Guardian Test', function () {
         /**
          * Ensure that the expected status matches state
          */
-        expect($site->getStatus())->toBe("Waiting for approval");
+        expect($site->getStatus())->toBe(EntityStatus::WAITING->value);
 
         /**
          * 10. As the "Administrator" approve the site
          */
-        $site->updateStatus("Approved");
+        $site->updateStatus(EntityStatus::APPROVED->value);
 
-        $option_tag = "Option_0";
+        $option_tag = GuardianApprovalOption::APPROVE->value;
         $site->assignTag($option_tag);
 
         /**
          * Ensure that the expected status matches state before registry site approve
          */
-        expect($site->getStatus())->toBe("Approved");
+        expect($site->getStatus())->toBe(EntityStatus::APPROVED->value);
         expect($site->getTag())->toBe($option_tag);
 
         $tag = "approve_site_button";
@@ -524,9 +389,9 @@ describe('Functional Guardian Test', function () {
 
         $this->policy_workflow->filterByTag("site_grid_owner_filter", $uuid);
 
-        $site = $this->policy_workflow->dataByTagToFilterBlock("approve_sites_grid");
+        $site = $this->policy_workflow->dataByTagToDocumentBlock("approve_sites_grid");
 
-        expect($site->getStatus())->toBe("Approved");
+        expect($site->getStatus())->toBe(EntityStatus::APPROVED->value);
 
         sleep(2);
 
@@ -534,8 +399,8 @@ describe('Functional Guardian Test', function () {
          * 11. As the "Supplier" create a new "claim" related to the site.
          */
 
-        $document = json_decode($claim, true);
-        $claim_uuid = $document['uuid'];
+        $claim_doc = json_decode($claim, true);
+        $claim_uuid = $claim_doc['uuid'];
 
         // As the supplier user from before.
         $this->dry_run_scenario->login($user->did);
@@ -543,10 +408,10 @@ describe('Functional Guardian Test', function () {
         // Site uuid
         $this->policy_workflow->filterByTag("site_grid_supplier_filter", $uuid);
 
-        $claim = $this->policy_workflow->dataByTagToFilterBlock("sites_grid");
+        $claim = $this->policy_workflow->dataByTagToDocumentBlock("sites_grid");
 
         $tag = "create_claim_request_form";
-        $referred_doc = $claim->forNewDocumentReference($document);
+        $referred_doc = $claim->chainDocumentAsReference($claim_doc);
 
         $this->policy_workflow->sendDataToTag($tag, $referred_doc);
 
@@ -567,7 +432,7 @@ describe('Functional Guardian Test', function () {
         // This is stateful in API.
         $this->policy_workflow->filterByTag("claim_request_verifier_filter", $claim_uuid);
 
-        $claim = $this->policy_workflow->dataByTagToFilterBlock("claim_requests_grid(verifier)");
+        $claim = $this->policy_workflow->dataByTagToDocumentBlock("claim_requests_grid(verifier)");
 
         /**
          * Ensure that the expected uuid matches the filter
@@ -577,7 +442,7 @@ describe('Functional Guardian Test', function () {
         /**
          * Ensure that the expected status matches state
          */
-        expect($claim->getStatus())->toBe("Waiting for approval");
+        expect($claim->getStatus())->toBe(EntityStatus::WAITING->value);
 
         /**
          * 12. As a new "verifier" approve the claim for minting
@@ -586,12 +451,12 @@ describe('Functional Guardian Test', function () {
         /**
          * 10. As the "Administrator" approve the site
          */
-        $claim->updateStatus("Approved");
+        $claim->updateStatus(EntityStatus::APPROVED->value);
 
-        $option_tag = "Option_0";
+        $option_tag = GuardianApprovalOption::APPROVE->value;
         $claim->assignTag($option_tag);
 
-        expect($claim->getStatus())->toBe("Approved");
+        expect($claim->getStatus())->toBe(EntityStatus::APPROVED->value);
         expect($claim->getTag())->toBe($option_tag);
 
         $tag = "approve_claim_requests_btn";
@@ -602,12 +467,12 @@ describe('Functional Guardian Test', function () {
         sleep(2);
 
         $this->policy_workflow->filterByTag("claim_request_verifier_filter", $claim_uuid);
-        $claim = $this->policy_workflow->dataByTagToFilterBlock("claim_requests_grid(verifier)");
+        $claim = $this->policy_workflow->dataByTagToDocumentBlock("claim_requests_grid(verifier)");
 
         ray($claim_uuid);
         ray($claim);
 
-        expect($claim->getStatus())->toBe("Approved");
+        expect($claim->getStatus())->toBe(EntityStatus::APPROVED->value);
 
         // TODO: asset should mint!
 
@@ -616,9 +481,6 @@ describe('Functional Guardian Test', function () {
          */
         // $this->dry_run_scenario->restart();
         // $this->policy_mode->draft();
-    });//->skip();
-
-
-
+    });
 
 })->with('project', 'site', 'claim');
