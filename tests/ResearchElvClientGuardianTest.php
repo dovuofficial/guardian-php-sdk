@@ -445,11 +445,7 @@ describe('Functional Guardian Test', function () {
         expect($claim->getStatus())->toBe(EntityStatus::WAITING->value);
 
         /**
-         * 12. As a new "verifier" approve the claim for minting
-         */
-
-        /**
-         * 10. As the "Administrator" approve the site
+         * 13. As a new "verifier" approve the claim for minting
          */
         $claim->updateStatus(EntityStatus::APPROVED->value);
 
@@ -468,9 +464,6 @@ describe('Functional Guardian Test', function () {
 
         $this->policy_workflow->filterByTag("claim_request_verifier_filter", $claim_uuid);
         $claim = $this->policy_workflow->dataByTagToDocumentBlock("claim_requests_grid(verifier)");
-
-        ray($claim_uuid);
-        ray($claim);
 
         expect($claim->getStatus())->toBe(EntityStatus::APPROVED->value);
 
