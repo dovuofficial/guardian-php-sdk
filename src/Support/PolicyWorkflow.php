@@ -4,7 +4,6 @@ namespace Dovu\GuardianPhpSdk\Support;
 
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
-use Dovu\GuardianPhpSdk\Domain\FilterVerifiableCredentialBlock;
 
 /**
  * The policy workflow only cares about retrieving and submitting data from/to blocks.
@@ -30,11 +29,6 @@ class PolicyWorkflow
         return $this->context->block->dataByTag($this->context->policyId, $tag);
     }
 
-    public function dataByTagToFilterBlock($tag): FilterVerifiableCredentialBlock
-    {
-        return $this->context->block->dataByTagToFilterBlock($this->context->policyId, $tag);
-    }
-
     public function dataByTagToDocumentBlock($tag): CredentialDocumentBlock
     {
         return $this->context->block->dataByTagToCredentialBlock($this->context->policyId, $tag);
@@ -51,10 +45,17 @@ class PolicyWorkflow
         return $this->context->block->assignRole($this->context->policyId, $role);
     }
 
-    // Used for new documents from a particular actor
+    /**
+     * Used for new documents from a particular actor, like a supplier sending the initial
+     * project to the registry.
+     **/
     public function sendDocumentToTag($tag, array $data): object
     {
-        return $this->context->block->sendDocumentToTag($this->context->policyId, $tag, $data);
+        $document = [
+            'document' => $data,
+        ];
+
+        return $this->context->block->sendToTag($this->context->policyId, $tag, $document);
     }
 
     // Used for document modification (Approvals and refs down stream)
