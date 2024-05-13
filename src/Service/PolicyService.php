@@ -97,7 +97,7 @@ class PolicyService extends AbstractService
             return [];
         }
 
-            return $this->httpClient->get("policies/{$policyId}/trustchains");
+        return $this->httpClient->get("policies/{$policyId}/trustchains");
     }
 
     /**
