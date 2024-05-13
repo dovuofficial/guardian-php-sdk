@@ -2,6 +2,8 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\Constants\GuardianRole;
+
 class AccountService extends AbstractService
 {
     public function login($username, $password): object
@@ -10,6 +12,21 @@ class AccountService extends AbstractService
                 'username' => $username,
                 'password' => $password,
         ], true);
+    }
+
+    public function register($username, $password, GuardianRole $role): object
+    {
+        return (object) $this->httpClient->post('accounts/register', [
+                'username' => $username,
+                'password' => $password,
+                'password_confirmation' => $password,
+                'role' => $role->value,
+        ], true);
+    }
+
+    public function session(): object
+    {
+        return (object) $this->httpClient->get('accounts/session');
     }
 
     public function create($username, $password)
