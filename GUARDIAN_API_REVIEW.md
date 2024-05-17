@@ -1,4 +1,4 @@
-# Evaluating the Hedera Guardian API: Collaborative Efforts and Future Directions
+# Evaluating the Hedera Guardian API: Focusing on end-to-end Dry Run Functionality
 
 ## Introduction
 
