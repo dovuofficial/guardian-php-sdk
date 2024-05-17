@@ -2,9 +2,21 @@
 
 ## Introduction
 
-The Hedera Guardian API represents a significant advancement in decentralized identity and data management. As we continue to integrate and optimize its capabilities, it's essential to approach our evaluation with a spirit of collaboration and mutual support. This document aims to provide a comprehensive overview of our experiences with the Guardian API, focusing on shared challenges and the collective journey towards scalable and efficient solutions.
+**Note**: While this review aims to be as thorough as possible in detailing the end-to-end workflow using the Guardian API's dry run capability, it is important to acknowledge that many of these issues are still workable. Our primary focus is to eliminate any data-related "N+1" issues and to enable filtering on blocks without requiring policy modifications, thus providing a robust foundational piece for future development.
+
+The Hedera Guardian represents a significant advancement in decentralized identity and data management. As we continue to integrate and optimize its capabilities, it's essential to approach our evaluation with a spirit of collaboration and mutual support. This document aims to provide a comprehensive overview of our latest experience with the Guardian API, focusing on shared challenges and the collective journey towards scalable and efficient solutions.
 
 We will also be including links to the SDK As it is being built, and in addition, links to all related Github issues on Guardian.
+
+_Also, If you would like to see any (loom) videos That illustrate any item within this document please let me know, and I'll be more than happy to deliver_
+
+## Current issues listed on Github related to this dry-run review
+
+1. [Filtering data for blocks is stateful API, introduce stateless data filters for API usage.](https://github.com/hashgraph/guardian/issues/3610)
+2. [[Dry run API] Creation of new users returns all users](https://github.com/hashgraph/guardian/issues/3642)
+3. [Refreshing of available filter state on Guardian (Potential Caching Issue)](https://github.com/hashgraph/guardian/issues/3641)
+
+Here is the link to the [PHP SDK for Guardian](https://github.com/dovuofficial/guardian-php-sdk/blob/research/guardian-client/) for reference. 
 
 ## Initial API Evaluation: Utilizing the Guardian's Dry Run Capability
 
@@ -124,14 +136,14 @@ The createUser function not only creates a new user but also retrieves all exist
 
 This N+1 problem presents a substantial challenge for scaling tests, particularly when aiming to test the software with hundreds of thousands of users. As the number of users increases, the system's performance degrades due to the escalating volume of data being returned with each GET request.
 
-
-
 ## Challenges in Working with the Guardian API
 
 **Understanding the Guardian's Inner Workings**
+
 Working with the Guardian API involves a deep understanding of its inner workings, often requiring a combination of reverse engineering and navigating poor documentation. The current state of the API presents several challenges that developers must overcome to effectively use the system.
 
 **User Creation and Role Assignment**
+
 During a "dry run," a user must be created without interfacing with the Hedera network for environments like testnet. This can be done using the following method in the SDK:
 
 Assigning a role to this user is managed through the SDK:
@@ -347,4 +359,125 @@ Challenges
 
 By addressing these challenges and improving documentation, the Guardian API can be made more accessible and easier to work with, reducing the time required to implement and test approval workflows.
 
-## Chaining Blocks through policy process
+## Chaining Blocks through Policy Process
+
+### Introduction
+
+Chaining blocks through the policy process is a crucial aspect of interacting with the Guardian API. This involves connecting different stages of a workflow by referring to previous blocks, ensuring that data flows seamlessly from one block to another.
+
+### Example Scenario
+
+Consider a scenario where a block representing a "project registration/definition" for a project developer or supplier has just been approved. An entity with a particular role, such as a registry or verifier (VVB), takes a positive action to approve this block.
+
+Following this, another block related to the supplier needs to connect to the first block. For instance, this could be a "site" block, representing a geographical area or sensor installation linked to the project.
+
+### Code Example for Chaining Blocks
+
+```php
+$supplier = $this->policy_workflow->dataByTagToDocumentBlock("create_site_form");
+
+expect($supplier->getStatus())->toBe(EntityStatus::APPROVED->value);
+
+/**
+ * Prepare site document
+ */
+$site = json_decode($site, true);
+$uuid = $site['uuid'];
+
+// As the supplier user from before.
+$this->dry_run_scenario->login($user->did);
+
+/**
+ * Send site document to the correct tag using previous doc as reference.
+ */
+$tag = "create_site_form";
+$referred_doc = $supplier->chainDocumentAsReference($site);
+
+$this->policy_workflow->sendDataToTag($tag, $referred_doc);
+```
+
+## Explanation of the Code
+
+1. Fetching Current Data:
+ - The dataByTagToDocumentBlock method fetches the current data for the tag "create_site_form."
+ - The status of the fetched data is verified to ensure it is in the "APPROVED" state.
+
+2. Preparing the Site Document:
+ - The site document is prepared and its UUID is extracted.
+
+3. Logging in as the Supplier:
+ - The supplier logs in to continue the process.
+
+4. Sending Data to the Correct Tag:
+- The chainDocumentAsReference method is used to create a reference to the previous document.
+- The new document, along with the reference, is sent to the "create_site_form" tag.
+
+## Chaining Documents with References
+
+The "chainDocumentAsReference" method is essential for linking the new document to the previous block:
+
+```php
+public function chainDocumentAsReference($document): array
+{
+    return [
+        'document' => $document,
+        'tag' => $this->tag,
+        'ref' => $this->block_data,
+    ];
+}
+```
+
+## Practical Considerations
+
+1. Extracting and Referencing Data:
+   - The block data from the initial fetch needs to resolve to the given reference.
+   - The correct tag and any new document that has been validated are injected into the document array.
+
+2. Handling Asynchronous Operations:
+   - Timeouts, such as sleep, are used to handle asynchronous operations and ensure that the Guardian is ready to accept the next stage of the workflow.
+   - Despite not using external services such as IPFS or Hedera, there are still asynchronous issues that need to be managed.
+
+3. Complex Scenarios:
+   - In scenarios where a site has been created and claims need to be assigned against that site, the process can be more complex. The following example illustrates this:
+
+```php
+$claim_doc = json_decode($claim, true);
+$claim_uuid = $claim_doc['uuid'];
+
+// As the supplier user from before.
+$this->dry_run_scenario->login($user->did);
+
+// Site uuid
+$this->policy_workflow->filterByTag("site_grid_supplier_filter", $uuid);
+
+$claim = $this->policy_workflow->dataByTagToDocumentBlock("sites_grid");
+
+$tag = "create_claim_request_form";
+$referred_doc = $claim->chainDocumentAsReference($claim_doc);
+
+$this->policy_workflow->sendDataToTag($tag, $referred_doc);
+```
+
+4. Data Extraction and Workflow Inconsistencies:
+- The data extraction and reference process may vary between different parts of the workflow. For example, fetching initial references from "sites_grid" and then sending data to "create_claim_request_form" does not follow a consistent pattern.
+- This inconsistency can lead to confusion and difficulty in achieving the desired results across different contexts.
+
+5. Cache Invalidation and State Management:
+- Cache invalidation issues require pushing data to a block, requesting the data belonging to a particular tag (triggering a cache refresh), filtering on a specific value, and then requesting the data again related to a particular block.
+- The Guardian API's stateful nature can cause problems when multiple processes are acting in parallel.
+
+6. Effort and Documentation:
+- Due to vague documentation, significant effort is required to fully understand and implement the workflow through the API.
+- The process often involves trial and error and reverse engineering, making it time-consuming and complex.
+
+## Summary of Challenges
+
+Summary of Challenges
+
+- Reverse Engineering: The lack of comprehensive documentation and examples necessitates a significant amount of reverse engineering to understand the exact tags and necessary payload structures.
+- Black Box Testing: Implementing approval steps often requires experimenting and testing various scenarios to determine the correct workflow.
+- Inconsistencies in Data Handling: Different parts of the workflow may require different methods to achieve the same results, leading to potential confusion and errors.
+- Managing Asynchronous Operations: Handling stateful interactions and asynchronous operations can be challenging, especially without external services like IPFS or Hedera.
+- Cache Invalidation: Ensuring data consistency and managing cache invalidation is crucial for maintaining the correct workflow state.
+
+By addressing these factual challenges, developers can better navigate the complexities of chaining blocks through the policy process in the Guardian API. Black Box Testing: Implementing approval steps often requires experimenting and testing various scenarios to determine the correct workflow.
