@@ -140,7 +140,7 @@ This N+1 problem presents a substantial challenge for scaling tests, particularl
 
 **Understanding the Guardian's Inner Workings**
 
-Working with the Guardian API involves a deep understanding of its inner workings, often requiring a combination of reverse engineering and navigating poor documentation. The current state of the API presents several challenges that developers must overcome to effectively use the system.
+Working with the Guardian API involves a deep understanding of its inner workings, often requiring a combination of reverse engineering and navigating vague documentation. The current state of the API presents several challenges that developers must overcome to effectively use the system.
 
 **User Creation and Role Assignment**
 
