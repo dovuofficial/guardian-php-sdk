@@ -2,6 +2,7 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
 
@@ -12,11 +13,11 @@ class BlockService extends AbstractService
         return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks");
     }
 
-    public function dataByTagToCredentialBlock(string $policyId, string $tag): CredentialDocumentBlock
+    public function dataByTagToCredentialBlock(string $policyId, string $tag, EntityStatus $status = null): CredentialDocumentBlock
     {
         $data = $this->dataByTag($policyId, $tag);
 
-        return new CredentialDocumentBlock($data);
+        return new CredentialDocumentBlock($data, $status);
     }
 
     // Might not work due to tag instead of blocks
