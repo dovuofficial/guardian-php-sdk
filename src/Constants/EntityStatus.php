@@ -12,4 +12,5 @@ enum EntityStatus: string
     case WAITING = 'Waiting for approval';
     case APPROVED = 'Approved';
     case REJECTED = 'Rejected';
+    case MINTING = 'Minting';
 }
