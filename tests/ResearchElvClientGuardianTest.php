@@ -242,7 +242,7 @@ describe('Functional Guardian Test', function () {
 
         $this->dry_run_scenario->restart();
 
-//        $this->policy_mode->draft();
+        //        $this->policy_mode->draft();
     })->skip();
 
     it('A dry-run policy after status change can expect data for a site', function ($project, $site, $claim) {
@@ -500,7 +500,7 @@ describe('Functional Guardian Test', function () {
 
     // TODO: in progress
     it('using raw vp-raw trustchain data to infer the new trustchain model', function () {
-        
+
 
     });//->skip();
 
