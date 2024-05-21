@@ -2,6 +2,9 @@
 
 namespace Dovu\GuardianPhpSdk\Domain;
 
+use Dovu\GuardianPhpSdk\Constants\EntityStatus;
+use Exception;
+
 class CredentialDocumentBlock
 {
     // Represents the raw data for fetching data for a block
@@ -13,23 +16,44 @@ class CredentialDocumentBlock
     // Tag is assigned to a document on future submissions
     private ?string $tag = null;
 
-    // Ref of previous object in a chain
-    private ?object $ref = null;
-
     /**
      * @param object $block_data
+     * @param EntityStatus|null $entityStatus
+     * @throws Exception
      */
-    public function __construct(object $block_data)
+    public function __construct(object $block_data, EntityStatus $entityStatus = null)
     {
         /**
          * This is the difference between a "requestVcDocumentBlock" and an "interface(filter)SourceBlock" should be simpler
          *
          * So the data from a block is a single "item" or first from the list.
          */
-        $this->block_data = $block_data->data['0'] ?? $block_data->data;
+        $this->block_data = $this->retrieveBlockDataForContext($block_data, $entityStatus);
 
         // TODO: Add safety checks for extracting object
         $this->credential_subject = (object) $this->block_data['document']['credentialSubject']['0'];
+    }
+
+    /**
+     * @throws Exception
+     */
+    private static function retrieveBlockDataForContext(object $block_data, EntityStatus $entityStatus = null)
+    {
+        if (! $entityStatus) {
+            return $block_data->data['0'] ?? $block_data->data;
+        }
+
+        // Loop through $block_data until the correct status is found, or throw.
+        $blocks = (array) $block_data->data;
+
+        $status_filter = fn ($block) => $block['option']['status'] == $entityStatus->value;
+        $block_by_status = current(array_filter($blocks, $status_filter));
+
+        if ($block_by_status) {
+            return $block_by_status;
+        }
+
+        throw new Exception("Unable to scan for block by status '$entityStatus->value'");
     }
 
     // Magic method usage to hoist up credential subject field, might revisit later
@@ -95,6 +119,11 @@ class CredentialDocumentBlock
     public function getStatus(): string
     {
         return $this->block_data['option']['status'];
+    }
+
+    public function getHash(): string
+    {
+        return $this->block_data['hash'];
     }
 
     public function getTag(): string
