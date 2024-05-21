@@ -2,6 +2,7 @@
 
 namespace Dovu\GuardianPhpSdk\Support;
 
+use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
 
@@ -29,9 +30,9 @@ class PolicyWorkflow
         return $this->context->block->dataByTag($this->context->policyId, $tag);
     }
 
-    public function dataByTagToDocumentBlock($tag): CredentialDocumentBlock
+    public function dataByTagToDocumentBlock($tag, EntityStatus $status = null): CredentialDocumentBlock
     {
-        return $this->context->block->dataByTagToCredentialBlock($this->context->policyId, $tag);
+        return $this->context->block->dataByTagToCredentialBlock($this->context->policyId, $tag, $status);
     }
 
     // TODO: Expect current filter to be a externally generated uuid. (policy defined)
@@ -62,5 +63,28 @@ class PolicyWorkflow
     public function sendDataToTag($tag, $data): object
     {
         return $this->context->block->sendToTag($this->context->policyId, $tag, $data);
+    }
+
+    /**
+     * This is an opinionated method to allow the extraction of a trustchain from a "claim" uuid,
+     * or the last uuid used for the minting of an ecological credit.
+     *
+     * We are assuming that there are particular tags in the workflow, without them this could be considered
+     * dangerous to use and would require more defensive code.
+     *
+     * @param string $claim_state_uuid
+     * @return CredentialDocumentBlock
+     */
+    public function trustchainForCreditMint(string $claim_state_uuid)
+    {
+        $this->filterByTag("vp_filter_grid", $claim_state_uuid);
+
+        $data = $this->dataByTagToDocumentBlock("vp_grid", EntityStatus::MINTING);
+
+        $hash = $data->getHash();
+
+        $this->filterByTag("trustChainBlock", $hash);
+
+        return $this->dataByTagToDocumentBlock("trustChainBlock");
     }
 }
