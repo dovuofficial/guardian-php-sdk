@@ -220,7 +220,7 @@ describe('Functional Guardian Test', function () {
         $this->policy_mode->dryRun();
 
         // TODO: Uncomment this to restart dry run state before assertions (in case of errors)
-        // $this->dry_run_scenario->restart();
+        $this->dry_run_scenario->restart();
 
         $users = $this->dry_run_scenario->users();
 
@@ -242,7 +242,7 @@ describe('Functional Guardian Test', function () {
 
         $this->dry_run_scenario->restart();
 
-        $this->policy_mode->draft();
+//        $this->policy_mode->draft();
     })->skip();
 
     it('A dry-run policy after status change can expect data for a site', function ($project, $site, $claim) {
@@ -465,6 +465,8 @@ describe('Functional Guardian Test', function () {
         $this->policy_workflow->filterByTag("claim_request_verifier_filter", $claim_uuid);
         $claim = $this->policy_workflow->dataByTagToDocumentBlock("claim_requests_grid(verifier)");
 
+        ray($claim);
+
         expect($claim->getStatus())->toBe(EntityStatus::APPROVED->value);
 
         // TODO: asset should mint!
@@ -474,6 +476,32 @@ describe('Functional Guardian Test', function () {
          */
         // $this->dry_run_scenario->restart();
         // $this->policy_mode->draft();
-    });
+    })->skip();
+
+    // TODO: in progress
+    it('An admin can read the trust chain', function () {
+
+
+        $this->helper->authenticateAsRegistry();
+
+        // TODO: test that a supplier/role could access trustchain
+
+
+        $uuid = " 05098615-b942-48ad-8f07-ce8fe959033f";
+
+        $trustchain = $this->policy_workflow->trustchainForCreditMint($uuid);
+
+
+        ray($trustchain);
+        ray(json_encode($trustchain->getBlockData()));
+
+
+    })->skip();
+
+    // TODO: in progress
+    it('using raw vp-raw trustchain data to infer the new trustchain model', function () {
+        
+
+    });//->skip();
 
 })->with('project', 'site', 'claim');
