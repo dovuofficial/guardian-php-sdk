@@ -75,8 +75,12 @@ class PolicyWorkflow
      * @param string $claim_state_uuid
      * @return CredentialDocumentBlock
      */
-    public function trustchainForCreditMint(string $claim_state_uuid)
+    public function trustchainForTokenMint(string $claim_state_uuid)
     {
+        /**
+         * TODO: extract tags
+         * design a DTO for easy usage of trustchain
+         */
         $this->filterByTag("vp_filter_grid", $claim_state_uuid);
 
         $data = $this->dataByTagToDocumentBlock("vp_grid", EntityStatus::MINTING);
