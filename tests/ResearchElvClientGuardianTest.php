@@ -3,6 +3,7 @@
 use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
+use Dovu\GuardianPhpSdk\Domain\Trustchain;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
 use Dovu\GuardianPhpSdk\Support\GuardianSDKHelper;
@@ -476,6 +477,16 @@ describe('Functional Guardian Test', function () {
          */
         // $this->dry_run_scenario->restart();
         // $this->policy_mode->draft();
+
+
+        // WIP
+        //        sleep(10);
+
+        //        $data = $this->policy_workflow->trustchainForTokenMint($claim->uuid);
+        //
+        //        $trustchain = new Trustchain($data);
+        //
+        //        ray($trustchain->format());
     })->skip();
 
     // TODO: in progress
@@ -489,19 +500,15 @@ describe('Functional Guardian Test', function () {
 
         $uuid = " 05098615-b942-48ad-8f07-ce8fe959033f";
 
-        $trustchain = $this->policy_workflow->trustchainForCreditMint($uuid);
+        $data = $this->policy_workflow->trustchainForTokenMint($uuid);
 
+        $trustchain = new Trustchain($data);
 
         ray($trustchain);
-        ray(json_encode($trustchain->getBlockData()));
+        ray($trustchain->format());
+
+        expect($trustchain->format())->toBeTruthy();
 
 
     })->skip();
-
-    // TODO: in progress
-    it('using raw vp-raw trustchain data to infer the new trustchain model', function () {
-
-
-    });//->skip();
-
 })->with('project', 'site', 'claim');
