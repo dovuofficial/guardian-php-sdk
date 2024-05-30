@@ -91,4 +91,20 @@ class PolicyWorkflow
 
         return $this->dataByTagToDocumentBlock("trustChainBlock");
     }
+
+    public function getPolicySchemas(): array
+    {
+        $policy = $this->context->policies->get($this->context->policyId);
+
+        return $this->context->schema->get($policy->topicId);
+    }
+
+    public function getSchemaForName(string $name): object
+    {
+        $schemas = $this->getPolicySchemas();
+
+        $filter = array_filter($schemas, fn ($elem) => $elem['name'] == $name);
+
+        return (object) current($filter);
+    }
 }

@@ -3,6 +3,7 @@
 use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
+use Dovu\GuardianPhpSdk\Domain\PolicySchemaDocument;
 use Dovu\GuardianPhpSdk\Domain\Trustchain;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
@@ -471,44 +472,42 @@ describe('Functional Guardian Test', function () {
         expect($claim->getStatus())->toBe(EntityStatus::APPROVED->value);
 
         // TODO: asset should mint!
-
-        /**
-         * Later: Reset policy state
-         */
-        // $this->dry_run_scenario->restart();
-        // $this->policy_mode->draft();
-
-
-        // WIP
-        //        sleep(10);
-
-        //        $data = $this->policy_workflow->trustchainForTokenMint($claim->uuid);
-        //
-        //        $trustchain = new Trustchain($data);
-        //
-        //        ray($trustchain->format());
     })->skip();
 
     // TODO: in progress
-    it('An admin can read the trust chain', function () {
+    //    it('An admin can read the trust chain', function () {
+    //
+    //        $this->helper->authenticateAsRegistry();
+    //
+    //        // TODO: test that a supplier/role could access trustchain
+    //        $uuid = "89325a37-eaf0-47d6-b0cc-6c01c3fcc408";
+    //
+    //        $data = $this->policy_workflow->trustchainForTokenMint($uuid);
+    //
+    //        $trustchain = new Trustchain($data);
+    //
+    //        // TODO: WORK IN PROGRESS
+    //        ray($trustchain->format());
+    //    })->skip();
 
+    it('Fetch some schemas', function () {
 
         $this->helper->authenticateAsRegistry();
 
-        // TODO: test that a supplier/role could access trustchain
+        // TODO: This should be a tag for to reference a schema
+        $name = "Claim (MRV) - ELV Submission and certificate of deposit";
 
+        $schema = $this->policy_workflow->getSchemaForName($name);
 
-        $uuid = " 05098615-b942-48ad-8f07-ce8fe959033f";
+        $document = json_decode($schema->document, true);
 
-        $data = $this->policy_workflow->trustchainForTokenMint($uuid);
+        $policySchemaDocument = new PolicySchemaDocument($document);
 
-        $trustchain = new Trustchain($data);
+        $spec = (object) $policySchemaDocument->schemaValidationSpecification();
 
-        ray($trustchain);
-        ray($trustchain->format());
+        expect($spec->title)->toBe($name);
+        expect($spec->type)->toBe("object");
+        expect($spec->uuid)->toBeTruthy();
 
-        expect($trustchain->format())->toBeTruthy();
-
-
-    })->skip();
+    });//->skip();
 })->with('project', 'site', 'claim');
