@@ -44,7 +44,7 @@ class SchemaProperties
 
     public array $properties;
 
-    public const SCHEMA_WHITELIST = ['title', 'type', 'description'];
+    public const SCHEMA_WHITELIST = ['title', 'type', 'description', 'required'];
 
     private function __construct(
         public PolicySchemaDocument $document,
