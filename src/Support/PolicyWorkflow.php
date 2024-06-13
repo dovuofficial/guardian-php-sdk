@@ -2,9 +2,11 @@
 
 namespace Dovu\GuardianPhpSdk\Support;
 
+use Dovu\GuardianPhpSdk\Constants\BlockKey;
 use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
+use Dovu\GuardianPhpSdk\Domain\PolicyConfiguration;
 
 /**
  * The policy workflow only cares about retrieving and submitting data from/to blocks.
@@ -13,7 +15,7 @@ use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
  */
 class PolicyWorkflow
 {
-    private PolicyContext $context;
+    public PolicyContext $context;
 
     private function __construct(PolicyContext $context)
     {
@@ -92,18 +94,33 @@ class PolicyWorkflow
         return $this->dataByTagToDocumentBlock("trustChainBlock");
     }
 
+    public function getPolicy(): object
+    {
+        return $this->context->policies->get($this->context->policyId);
+    }
+
     public function getPolicySchemas(): array
     {
-        $policy = $this->context->policies->get($this->context->policyId);
+        $policy = $this->getPolicy();
 
         return $this->context->schema->get($policy->topicId);
     }
 
-    public function getSchemaForName(string $name): object
+    public function getRoles(): array
+    {
+        return $this->getPolicy()->policyRoles;
+    }
+
+    public function getConfiguration(): PolicyConfiguration
+    {
+        return new PolicyConfiguration(workflow: $this);
+    }
+
+    public function getSchemaForKey(string $v, BlockKey $ky = BlockKey::IRI): object
     {
         $schemas = $this->getPolicySchemas();
 
-        $filter = array_filter($schemas, fn ($elem) => $elem['name'] == $name);
+        $filter = array_filter($schemas, fn ($elem) => $elem[$ky->value] == $v);
 
         return (object) current($filter);
     }
