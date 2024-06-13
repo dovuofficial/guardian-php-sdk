@@ -4,7 +4,7 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 class ImportService extends AbstractService
 {
-    const MAX_TRIES = 60;
+    public const MAX_TRIES = 60;
 
     private function task(string $id): array
     {
