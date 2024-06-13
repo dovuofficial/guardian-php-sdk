@@ -31,9 +31,9 @@ class BlockService extends AbstractService
         ], true);
     }
 
-    public function dataById(string $policyId, string $id): object
+    public function dataById(string $policyId, string $id): array
     {
-        return (object) $this->httpClient->get("policies/{$policyId}/blocks/{$id}");
+        return $this->httpClient->get("policies/{$policyId}/blocks/");
     }
 
     public function fromTag(string $policyId, string $tag): object
