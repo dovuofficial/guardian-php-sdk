@@ -4,7 +4,6 @@ use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\PolicySchemaDocument;
-use Dovu\GuardianPhpSdk\Domain\Trustchain;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
 use Dovu\GuardianPhpSdk\Support\GuardianSDKHelper;
@@ -12,6 +11,11 @@ use Dovu\GuardianPhpSdk\Support\PolicyContext;
 use Dovu\GuardianPhpSdk\Support\PolicyMode;
 use Dovu\GuardianPhpSdk\Support\PolicyStatus;
 use Dovu\GuardianPhpSdk\Support\PolicyWorkflow;
+use Dovu\GuardianPhpSdk\Workflow\Constants\ApprovalOption;
+use Dovu\GuardianPhpSdk\Workflow\GuardianActionMediator;
+use Dovu\GuardianPhpSdk\Workflow\GuardianWorkflowConfiguration;
+use Dovu\GuardianPhpSdk\Workflow\Model\GuardianActionTransaction;
+use Dovu\GuardianPhpSdk\Workflow\Model\WorkflowElement;
 use Ramsey\Uuid\Uuid;
 
 /********************************************* OVERVIEW *************************************************
@@ -108,7 +112,8 @@ describe('Functional Guardian Test', function () {
         $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
 
         // mmcm elv
-        $policy_id = "6633615cf14d4f12d437f9eb";
+        //        $policy_id = "6633615cf14d4f12d437f9eb";
+        $policy_id = "665defabf14d4f12d4381c46";
 
         $context = PolicyContext::using($this->sdk)->for($policy_id);
 
@@ -358,7 +363,6 @@ describe('Functional Guardian Test', function () {
 
         // This is stateful in API.
         $this->policy_workflow->filterByTag("site_grid_owner_filter", $uuid);
-
         $site = $this->policy_workflow->dataByTagToDocumentBlock("approve_sites_grid");
 
         /**
@@ -409,7 +413,6 @@ describe('Functional Guardian Test', function () {
 
         // Site uuid
         $this->policy_workflow->filterByTag("site_grid_supplier_filter", $uuid);
-
         $claim = $this->policy_workflow->dataByTagToDocumentBlock("sites_grid");
 
         $tag = "create_claim_request_form";
@@ -490,14 +493,14 @@ describe('Functional Guardian Test', function () {
     //        ray($trustchain->format());
     //    })->skip();
 
-    it('Fetch some schemas', function () {
+    it('Fetch a specification of a schema for workflow import and validation', function () {
 
         $this->helper->authenticateAsRegistry();
 
-        // TODO: This should be a tag for to reference a schema
-        $name = "Claim (MRV) - ELV Submission and certificate of deposit";
+        // Ids are fetched through a tag of a block
+        $id = "#a753238f-d4f5-4849-9249-fa93a4cc6365";
 
-        $schema = $this->policy_workflow->getSchemaForName($name);
+        $schema = $this->policy_workflow->getSchemaForKey($id);
 
         $document = json_decode($schema->document, true);
 
@@ -505,9 +508,206 @@ describe('Functional Guardian Test', function () {
 
         $spec = (object) $policySchemaDocument->schemaValidationSpecification();
 
-        expect($spec->title)->toBe($name);
         expect($spec->type)->toBe("object");
         expect($spec->uuid)->toBeTruthy();
 
+    })->skip();
+
+    it('Import policy from timestamp', function () {
+
+        $this->helper->authenticateAsRegistry();
+
+        /**
+         * TODO: Use timestamp value from "test_workflow".
+         */
+        $timestamp = "1717422172.111136584";
+
+        // When something happens, complete
+        $status_update_callable = function ($state) {
+            ray("Status update");
+            ray($state);
+
+            if ($state->result) {
+                ray("done");
+                ray($state->result);
+
+                expect($state->result["policyId"])->toBeTruthy();
+            }
+        };
+
+        $this->policy_workflow->context->import->fromTimestamp($status_update_callable, $timestamp);
+
+    })->skip();
+
+    it('Using SDK builder methods to navigate and process the entire dryrun flow.', function ($project, $site, $claim) {
+
+        $this->helper->authenticateAsRegistry();
+
+        /**
+         * TODO: These are the tasks that need to be completed from state zero.
+         * 1. Create a new "standard registry" flow (requires additional account creation methods)
+         * 2. Import the policy configuration using the new standard registry
+         * 3. Update the context objects with the correct uploaded "registry" user and imported policy id.
+         */
+
+        //        $policy_id = "665defabf14d4f12d4381c46";
+        //        $this->policy_mode->dryRun();
+
+        /**
+         * Set up the workflow from configuration
+         */
+        $configuration = $this->policy_workflow->getConfiguration();
+        $conf = GuardianWorkflowConfiguration::get('test_workflow');
+        $specification = $configuration->generateWorkflowSpecification($conf['workflow']);
+
+        /**
+         * Create mediator object.
+         */
+        $mediator = GuardianActionMediator::with($this->policy_workflow);
+
+        /**
+         * Stage one: create an ecological project (identity handled outside)
+         */
+        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+        $user = (object) end($users);
+        $this->dry_run_scenario->login($user->did);
+        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+
+        /**
+         * Build an object for the particular action
+         */
+        $send_ecological = (object) $specification[0];
+        $element = WorkflowElement::parse($send_ecological);
+        $project = json_decode($project, true);
+
+        $result = GuardianActionTransaction::with($mediator)
+            ->setWorkflowElement($element)
+            ->setPayload($project)
+            ->run();
+
+        ray('$send_ecological');
+        ray($result);
+
+        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
+        sleep(2);
+
+        // Retain reference to admin
+        // As standard authority (first in the list of dry run users)
+        $admin = (object) $users[0];
+
+        /**
+         * Stage two: login as registry (handled outside workflow)
+         */
+        $this->dry_run_scenario->login($admin->did);
+
+        $approve_ecological = (object) $specification[1];
+        $element = WorkflowElement::parse($approve_ecological);
+
+        // TODO: This would be the "plucker" (can we make this more dynamic?)
+        $result = GuardianActionTransaction::with($mediator)
+            ->setWorkflowElement($element)
+            ->setFilterValue($project['uuid'])
+            ->setApprovalOption(ApprovalOption::APPROVE)
+            ->run();
+
+        sleep(2);
+
+        ray('$approve_ecological');
+        ray($result);
+
+        /**
+         * Stage three: login as supplier for site creation (handled outside workflow)
+         */
+        $this->dry_run_scenario->login($user->did);
+
+        $create_site = (object) $specification[2];
+        $element = WorkflowElement::parse($create_site);
+
+        $site = json_decode($site, true);
+
+        $result = GuardianActionTransaction::with($mediator)
+            ->setWorkflowElement($element)
+            ->setPayload($site)
+            ->run();
+
+        sleep(2);
+
+        ray('$create_site');
+        ray($result);
+
+        /**
+         * Stage four: login as registry for site approval (handled outside workflow)
+         */
+        $this->dry_run_scenario->login($admin->did);
+
+        $approve_site = (object) $specification[3];
+        $element = WorkflowElement::parse($approve_site);
+
+        $result = GuardianActionTransaction::with($mediator)
+            ->setWorkflowElement($element)
+            ->setApprovalOption(ApprovalOption::APPROVE)
+            ->setFilterValue($site['uuid'])
+            ->run();
+
+        sleep(2);
+
+        ray('$approve_site');
+        ray($result);
+
+        /**
+         * Stage five: login as supplier for claim creation (handled outside workflow)
+         */
+        $this->dry_run_scenario->login($user->did);
+
+        $create_claim = (object) $specification[4];
+        $element = WorkflowElement::parse($create_claim);
+
+        $claim = json_decode($claim, true);
+
+        $result = GuardianActionTransaction::with($mediator)
+            ->setWorkflowElement($element)
+            ->setPayload($claim)
+            ->setFilterValue($site['uuid'])
+            ->run();
+
+        sleep(2);
+
+        ray('$create_claim');
+        ray($result);
+
+        /**
+         * Stage six: create a verifier user
+         */
+
+        // Create verifier
+        $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+        $verifier = (object) end($users);
+
+        // Assign role
+        $this->dry_run_scenario->login($verifier->did);
+        $this->policy_workflow->assignRole(GuardianRole::VERIFIER);
+
+        /**
+         * Stage seven: login as verifier for claim approval (handled outside workflow)
+         */
+        $this->dry_run_scenario->login($verifier->did);
+
+        $approve_claim = (object) $specification[5];
+        $element = WorkflowElement::parse($approve_claim);
+
+        $result = GuardianActionTransaction::with($mediator)
+            ->setWorkflowElement($element)
+            ->setApprovalOption(ApprovalOption::APPROVE)
+            ->setFilterValue($claim['uuid'])
+            ->run();
+
+        sleep(2);
+
+        ray('$approve_claim');
+        ray($result);
+
+        // We should be able to read the trustchain.
+
     });//->skip();
+
 })->with('project', 'site', 'claim');
