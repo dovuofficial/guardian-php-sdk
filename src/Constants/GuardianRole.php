@@ -13,4 +13,6 @@ enum GuardianRole: string
     case VERIFIER = 'Verifier';
     case USER = 'USER';
     case REGISTRY = 'STANDARD_REGISTRY';
+    case OWNER = 'OWNER';
+    case NONE = 'NO_ROLE';
 }
