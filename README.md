@@ -1,10 +1,11 @@
-# A PHP SDK to work with The Guardian
+# Guardian PHP SDK
+
+Configuration based Guardian policy consumption and management.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/dovuofficial/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/dovuofficial/guardian-php-sdk)
 [![Tests](https://github.com/dovuofficial/guardian-php-sdk/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/dovuofficial/guardian-php-sdk/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/dovuofficial/guardian-php-sdk.svg?style=flat-square)](https://packagist.org/packages/dovuofficial/guardian-php-sdk)
 
-This SDK lets you perform API calls to Dovu's Guardian API middleware. Making working with Hedera Guardian more streamlined.
 
 ## Installation
 
@@ -20,12 +21,34 @@ This is our third iteration of creating an SDK to wrap around the Guardian. We a
 
 The goal here is to have a direct connection to the Guardian API services itself and really think about designing a PHP SDK from the ground up.
 
-There are a number of items that need continued work in the next couple of weeks/months to have very refined, but simple SDK.
+There are a number of items that need continued work in the next couple of weeks to have very refined, but simple SDK.
 
-- Minimise methods required to interface with guardian.
-- Using processes/templates as a mechanism to work with guardian.
-- Ability to ingest any guardian policy and then dynamically infer all tags, roles, and order of operations as well as schemas.
-- Ensure that we have solid tests in place that highlights current guardian challenges, especially when it comes to scalability concerns specifically around N+1 issues for data query
+-[x] Minimise methods required to interface with guardian. 
+-[x] Using processes/templates as a mechanism to work with guardian.
+- Ongoing documentation of how to use system
+- Validation of the structure of a guardian workflow element, based on assumptions.
+- Update primary test to ensure that a trustchain can be read through API (possible caching issue)
+- Update primary test to ensure that the import process for a policy takes place.
+- Update primary test to use "listeners" for waiting for a particular state to be ready
+  - Ensure that this call is integrated into a given "workflow" action seemlessly
+- Add feature and test suite to support "testnet" tests after dry run, requirements:
+  - Ability to create new testnet users with account ids/key
+  - Assign roles
+  - Ensure the listener functionality for this pass (we don't know how long IPFS/Hedera calls will take)
+- Update GuardianActionTransaction to check for roles, as a _verbose_ mode.
+- Update core tests (Dryrun/Testnet) to ensure that a "standard registry" is created from scratch
+  - The use case here is, that if we provision a new guardian infrastructure the test suite needs to run all tasks e2e from zero state.
+- (In Progress) Ensure that we have solid tests in place that highlights current guardian challenges, especially when it comes to scalability concerns specifically around N+1 issues for data query
+
+## These tasks will be added after the e2e raw flow
+
+- Modification of core workflow to allow custom schemas for any stage
+- Output of new configuration files for particular usecases
+
+## These are tasks that have been deferred and classed as low priority
+
+- (Deferred) Ability to ingest any guardian policy and then dynamically infer all tags, roles, and order of operations as well as schemas.
+
 
 ## The current strategic approach
 
@@ -37,7 +60,259 @@ Currently, there are still a number of N +1 issues within the Guardian. This mea
 
 This version of the SDK is certainly almost thought through/optimal over the last three years, and it is our intent to use this system.
 
-## How it works
+## Using the SDK, see tests.
+
+This SDK uses a combination of a mediator and strategy pattern to be able to ingest and process configuration related to a particular workflow template.
+
+For a client consuming this SDK with some configuration this is the expected flow:
+
+1) Setup the initial context objects (this can be simplified)
+2) Import a "GuardianWorkflowConfiguration" from a filename.
+3) Generate a specification, which should be imported into your system.
+4) Elements of the specification will be used when processing each stage of a workflow.
+
+
+The creation of a context object with a supplied policy happens in this manner.
+
+```php
+$this->sdk = new DovuGuardianAPI();
+$this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
+
+$context = PolicyContext::using($this->sdk)->for($policy_id);
+$this->policy_workflow = PolicyWorkflow::context($context);
+
+/**
+ * Set up the workflow from configuration
+ */
+$configuration = $this->policy_workflow->getConfiguration();
+$conf = GuardianWorkflowConfiguration::get('test_workflow'); // From the "/config" folder
+$specification = $configuration->generateWorkflowSpecification($conf['workflow']);
+```
+
+The _specification_ is an array that contains all elements that are a hard requirement that needs to be passed into a "GuardianActionTransaction" further more a "schema_specification" is added which allows systems to validate payloads before hitting a Guardian system.  
+
+```php
+    [
+      0 => array:4 [▶
+        "role" => Dovu\GuardianPhpSdk\Constants\GuardianRole {#93▶}
+        "tag" => "create_ecological_project"
+        "type" => Dovu\GuardianPhpSdk\Workflow\Constants\WorkflowTask {#710▶}
+        "schema_specification" => array:13 [▶
+          "title" => "ELV Scrapping for CO2 Emission Avoidance (AMS-III.BA & AMS-III.AJ)"
+          "description" => "End-of-life vehicle project registration for the recovery and recycling of materials from e-waste, using a digitised form of UN CDM Methodology version 3.0"
+          "type" => "object"
+          "required" => array:12 [▶]
+          "uuid" => array:4 [▶]
+          "field0" => array:4 [▶]
+          "field1" => array:4 [▶]
+          "field2" => array:4 [▶]
+          "field3" => array:4 [▶]
+          "field4" => array:4 [▶]
+          "field5" => array:4 [▶]
+          "field6" => array:4 [▶]
+          "field7" => array:4 [▶]
+        ]
+      ]
+    ]
+```
+_There will be more validation added so the fields of each element can be checked accordingly_
+
+## The mediator object, that allows the consumption of elements
+
+This can either be stored in state or generated every time a new transaction is created.
+
+```php
+/**
+ * Create mediator object.
+ */
+$mediator = GuardianActionMediator::with($this->policy_workflow);
+```
+
+## Using a WorkflowElement, consuming the workflow in real time.
+
+Now, the onus is on the system outside of guardian to the consumption of a policy.
+
+If we consider different stages of how it should work, here are some examples below.
+
+```php
+/**
+ * Stage one: create an ecological project (identity handled outside)
+ */
+$users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+$user = (object) end($users);
+$this->dry_run_scenario->login($user->did);
+$this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+
+/**
+ * Build an object for the particular action
+ */
+$send_ecological = (object) $specification[0];
+$element = WorkflowElement::parse($send_ecological);
+$project = json_decode($project, true); // See "ResearchElvClientGuardianTest"
+
+$result = GuardianActionTransaction::with($mediator)
+    ->setWorkflowElement($element)
+    ->setPayload($project)
+    ->run();
+```
+
+_Note:_ The "$project" Can be either a JSON string or an array/dictionary, Eventually, we will add validation that will ensure that the given payload matches the expectation for a particular workflow element in realtime.
+
+Within the tests, or within your work, you can add logging statements ([ray](https://myray.app/) is used here) -- the timeout/sleep function will be changed with state listener functionality.
+
+```php
+ray('$send_ecological');
+ray($result);
+
+// TODO: Use the listener logic (This will increase based off of the current resource load on API)
+sleep(2);
+```
+
+The next stage of the flow would be to handle the _approval of a "project"_.
+
+```php
+/**
+ * Stage two: login as registry (handled outside workflow)
+ */
+$this->dry_run_scenario->login($admin->did);
+
+$approve_ecological = (object) $specification[1];
+$element = WorkflowElement::parse($approve_ecological);
+
+// TODO: This would be the "plucker" (can we make this more dynamic?)
+$result = GuardianActionTransaction::with($mediator)
+    ->setWorkflowElement($element)
+    ->setFilterValue($project['uuid'])
+    ->setApprovalOption(ApprovalOption::APPROVE)
+    ->run();
+```
+
+In this, next state/stage, the original "Supplier" Now has access to creates a site that is connected to a project.
+
+```php
+/**
+ * Stage three: login as supplier for site creation (handled outside workflow)
+ */
+$this->dry_run_scenario->login($user->did);
+
+$create_site = (object) $specification[2];
+$element = WorkflowElement::parse($create_site);
+
+$site = json_decode($site, true);
+
+$result = GuardianActionTransaction::with($mediator)
+    ->setWorkflowElement($element)
+    ->setPayload($site)
+    ->run();
+```
+
+And like before an admin/registry who is logged in can now approve the site.
+
+```php
+/**
+ * Stage four: login as registry for site approval (handled outside workflow)
+ */
+$this->dry_run_scenario->login($admin->did);
+
+$approve_site = (object) $specification[3];
+$element = WorkflowElement::parse($approve_site);
+
+$result = GuardianActionTransaction::with($mediator)
+    ->setWorkflowElement($element)
+    ->setApprovalOption(ApprovalOption::APPROVE)
+    ->setFilterValue($site['uuid'])
+    ->run();
+```
+
+So, now a "supplier" can now issue claims Against a site where there is proof of some impact activity.
+
+```php
+/**
+ * Stage five: login as supplier for claim creation (handled outside workflow)
+ */
+$this->dry_run_scenario->login($user->did);
+
+$create_claim = (object) $specification[4];
+$element = WorkflowElement::parse($create_claim);
+
+$claim = json_decode($claim, true);
+
+$result = GuardianActionTransaction::with($mediator)
+    ->setWorkflowElement($element)
+    ->setPayload($claim)
+    ->setFilterValue($site['uuid'])
+    ->run();
+```
+
+Finally, one must get access to a verifier, a trusted authority, that can sign off or approve on a given claim, which will then issue a token. 
+
+```php
+/**
+ * Stage six: create a verifier user
+ */
+
+// Create verifier
+$users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+$verifier = (object) end($users);
+
+// Assign role
+$this->dry_run_scenario->login($verifier->did);
+$this->policy_workflow->assignRole(GuardianRole::VERIFIER);
+
+/**
+ * Stage seven: login as verifier for claim approval (handled outside workflow)
+ */
+$this->dry_run_scenario->login($verifier->did);
+
+$approve_claim = (object) $specification[5];
+$element = WorkflowElement::parse($approve_claim);
+
+$result = GuardianActionTransaction::with($mediator)
+    ->setWorkflowElement($element)
+    ->setApprovalOption(ApprovalOption::APPROVE)
+    ->setFilterValue($claim['uuid'])
+    ->run();
+```
+
+From this time forward, a trustchain will be generated that will also issue digital credits with all of this information embed.
+
+## Implications of workflow and templates.
+
+This template relies on our specific "DOVU Standard" and has traditionally followed IWA flows.
+
+The benefit of this approach is that any workflow configuration can be adjusted or created to align closer to the needs of specific centralised registries or other entities.
+
+As an example, for Verra There are expectations that a verifier/VVB must review and approve the project or the PDD, instead of the registry itself -- And that's the issuance of tokens it's not dependent on constant verification, but that or external Actors are happy with the current state of the project itself, and that they are happy to issue ongoing credits post project validation.
+
+So, with this in mind, all the system needs to manage is the ability for any configuration to be used in a particular structure where these use cases are fully formed from within guardian, After these tests have been successful, then the same workflow template can be used to branch off into any kind of methodology (Through the injection of schemas that are "n" levels deep) for a specific registry. These methodologies can either be generated through the use of AI Systems and can be further verified for validity from the registry authorities.
+
+## Understanding the GuardianActionTransaction object.
+
+The **GuardianActionTransaction** Object is focused on ensuring the simplest way to process a guardian policy, by providing a single builder class that can be configured for a particular context, or in other words whether something needs to be posted to a "policy block" or if a "block" needs to be approved.
+
+The ongoing work will include validation to whether for a particular workflow action enough information has been provided, as an ongoing task it needs to be more _defensive_ to check against bad states and input automatically (perhaps as a "verbose" mode)
+
+Below are the breakdown of each individual method Within the builder and how they should be used for each portion of the test workflow.
+
+### The base object
+
+This snippet below produces a base transaction connected to any workflow element.
+
+```php
+GuardianActionTransaction::with($mediator)->setWorkflowElement($element)
+```
+
+### Action Transaction Methods
+
+The `setPayload` Method is used to connect a particular payload to a transaction, this would be used in the submission of data to a particular item/block in the workflow.
+
+The `setFilterValue` can Be used for any action that requires some kind of filter, From the approval of a particular entity, or the submission of identity, where there are many entities before it like a claim connecting to a site.
+
+The `setApprovalOption` should only be used in the approval/denial of an entity in a workflow.
+
+The `run` method take all the information provided and attempts to process it as a guardian action (TODO: We will be adding validation to ensure that for a particular action, or the elements have been submitted that the payloads are valid).
+
+## How it works (low level)
 
 As the policies we have developed or completely outside the realms of any available documentation this is how the process works.
 
@@ -168,9 +443,11 @@ $tag = "approve_claim_requests_btn";
 $this->policy_workflow->sendDataToTag($tag, $claim->forDocumentSubmission());
 ```
 
-Why are all of these code snippets seem relatively simple, alot of thought has gone into them, there are a few additions that need work, this is a work in progress inside of the testcase "ResearchElvClientGuardianTest".  
+While all of these code snippets seem relatively simple, alot of thought has gone into them, there are a few additions that need work, this is a work in progress inside of the testcase "ResearchElvClientGuardianTest".  
 
 ## V2 Example Documentation (Deprecated)
+
+_This SDK lets you perform API calls to Dovu's Guardian API middleware. Making working with Hedera Guardian more streamlined._
 
 This following documentation is the current deprecated methods and flow, we used by using a middleware API as a separate service that we would call over HTTPS/REST.
 
