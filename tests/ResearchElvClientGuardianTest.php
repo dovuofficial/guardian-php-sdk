@@ -1,11 +1,14 @@
 <?php
 
+use Dovu\GuardianPhpSdk\Config\EnvConfig;
 use Dovu\GuardianPhpSdk\Constants\EntityStatus;
+use Dovu\GuardianPhpSdk\Constants\Env;
 use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\PolicySchemaDocument;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
+use Dovu\GuardianPhpSdk\Support\GuardianActorFacade;
 use Dovu\GuardianPhpSdk\Support\GuardianSDKHelper;
 use Dovu\GuardianPhpSdk\Support\PolicyContext;
 use Dovu\GuardianPhpSdk\Support\PolicyMode;
@@ -111,18 +114,22 @@ describe('Functional Guardian Test', function () {
         $this->sdk = new DovuGuardianAPI();
         $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
 
-        // mmcm elv
-        //        $policy_id = "6633615cf14d4f12d437f9eb";
-        $policy_id = "665defabf14d4f12d4381c46";
+        // TODO: Remove. mmcm elv
+        $policy_id = "667ae92ef14d4f12d4382242";
 
         $context = PolicyContext::using($this->sdk)->for($policy_id);
 
         $this->helper = new GuardianSDKHelper($this->sdk, $policy_id);
 
-        // Create policy and dry run helpers
+        // TODO: Remove. Create policy and dry run helpers (shouldn't be here)
         $this->policy_mode = PolicyMode::context($context);
         $this->dry_run_scenario = DryRunScenario::context($context);
         $this->policy_workflow = PolicyWorkflow::context($context);
+        $this->actor_facade = GuardianActorFacade::context($context);
+    });
+
+    it('Tests should be enabled', function () {
+        expect(EnvConfig::instance()->testsEnabled())->toBeTruthy();
     });
 
     it('The Standard Registry can read the session', function () {
@@ -145,7 +152,7 @@ describe('Functional Guardian Test', function () {
         expect($session->walletToken)->toBe('');
         expect($session->role)->toBe(GuardianRole::REGISTRY->value);
         expect($session->refreshToken)->toBeTruthy();
-    });
+    })->skip();
 
     /**
      * TODO: Ensure valid HTTP Status codes for conflict of current user.
@@ -252,6 +259,7 @@ describe('Functional Guardian Test', function () {
         //        $this->policy_mode->draft();
     })->skip();
 
+    // TODO: Deprecated (old style)
     it('A dry-run policy after status change can expect data for a site', function ($project, $site, $claim) {
 
         /**
@@ -262,7 +270,7 @@ describe('Functional Guardian Test', function () {
         /**
          * 2. Ensure dry run and (possible) restart state
          */
-        //        $this->policy_mode->dryRun();
+        //                $this->policy_mode->dryRun();
         //        $this->dry_run_scenario->restart();
 
         /**
@@ -513,14 +521,56 @@ describe('Functional Guardian Test', function () {
 
     })->skip();
 
-    it('Import policy from timestamp', function () {
+    it('Using SDK builder methods to create registry, import, navigate and process the entire dryrun flow.', function ($project, $site, $claim) {
 
-        $this->helper->authenticateAsRegistry();
+
+        /***
+         * This below is simply using a user that already exists in the system
+         * to currently save on testnet HBARs that are transferred to a new
+         * account, in prod/testnet this would be part of the process.
+         */
+
+        // Create new user
+        //        $registry_user = "registry:" . Uuid::uuid4();
+
+        $registry_user = 'registry:3b0af58b-b3ee-400f-98d4-279d8c57a548';
+        $password = '123456';
+
+        //        $this->helper->authenticateAsRegistry($registry_user, $password);
+
+        //        return;
+
+        //        $register = $this->actor_facade->newRegistryAccount($registry_user, $password);
+        //
+        //        ray($register);
+        //
+        //        $this->helper->authenticateAsRegistry($registry_user, $password);
+        //
+        ////        $env = EnvConfig::instance();
+        ////        ray($env->get(Env::HEDERA_ACCOUNT_ID));
+        //
+        //        $hedera_account = $this->actor_facade->generateDemoKey();
+        //
+        //        ray($hedera_account);
+        //
+        //        $task = $this->actor_facade->addHederaAccountToActor($registry_user, $hedera_account);
+        //
+        //        ray($task);
+
+        $this->helper->authenticateAsRegistry($registry_user, $password);
 
         /**
-         * TODO: Use timestamp value from "test_workflow".
+         * Set up the workflow from configuration
          */
-        $timestamp = "1717422172.111136584";
+        $conf = GuardianWorkflowConfiguration::prepare('test_workflow');
+
+        /*
+         * Using timestamp value from "test_workflow" that is the concrete implementation
+         * of a given workflow template
+         */
+        $timestamp = $conf->timestamp();
+
+        expect($timestamp)->toBeTruthy();
 
         // When something happens, complete
         $status_update_callable = function ($state) {
@@ -535,13 +585,30 @@ describe('Functional Guardian Test', function () {
             }
         };
 
-        $this->policy_workflow->context->import->fromTimestamp($status_update_callable, $timestamp);
+        $task = $this->policy_workflow->context->import->fromTimestamp($status_update_callable, $timestamp);
 
-    })->skip();
+        ray($task);
 
-    it('Using SDK builder methods to navigate and process the entire dryrun flow.', function ($project, $site, $claim) {
+        $policy_id = $task->result["policyId"];
 
-        $this->helper->authenticateAsRegistry();
+        // TODO: remove, context "used on matt's machine" (to comment out import flow)
+        //        $policy_id = "6682a6c3f14d4f12d4382494";
+
+        $context = PolicyContext::using($this->sdk)->for($policy_id);
+
+        $this->helper = new GuardianSDKHelper($this->sdk, $policy_id);
+
+        // Create policy and dry run helpers
+        $this->policy_mode = PolicyMode::context($context);
+        $this->dry_run_scenario = DryRunScenario::context($context);
+        $this->policy_workflow = PolicyWorkflow::context($context);
+        $this->actor_facade = GuardianActorFacade::context($context);
+
+        $configuration = $this->policy_workflow->getConfiguration();
+        $specification = $configuration->generateWorkflowSpecification($conf->workflow);
+
+        // Do the thing!
+        $this->helper->authenticateAsRegistry($registry_user);
 
         /**
          * TODO: These are the tasks that need to be completed from state zero.
@@ -550,15 +617,7 @@ describe('Functional Guardian Test', function () {
          * 3. Update the context objects with the correct uploaded "registry" user and imported policy id.
          */
 
-        //        $policy_id = "665defabf14d4f12d4381c46";
-        //        $this->policy_mode->dryRun();
-
-        /**
-         * Set up the workflow from configuration
-         */
-        $configuration = $this->policy_workflow->getConfiguration();
-        $conf = GuardianWorkflowConfiguration::get('test_workflow');
-        $specification = $configuration->generateWorkflowSpecification($conf['workflow']);
+        $this->policy_mode->dryRun();
 
         /**
          * Create mediator object.
@@ -602,6 +661,7 @@ describe('Functional Guardian Test', function () {
 
         $approve_ecological = (object) $specification[1];
         $element = WorkflowElement::parse($approve_ecological);
+
 
         // TODO: This would be the "plucker" (can we make this more dynamic?)
         $result = GuardianActionTransaction::with($mediator)
