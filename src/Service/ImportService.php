@@ -2,30 +2,10 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\Domain\TaskInstance;
+
 class ImportService extends AbstractService
 {
-    public const MAX_TRIES = 60;
-
-    private function task(string $id): array
-    {
-        return (array) $this->httpClient->get("tasks/$id");
-    }
-
-    private function runnerTask(string $id, callable $fn, int $run = 0): object
-    {
-        $data = (object) $this->task($id);
-
-        $fn($data);
-
-        if ($data->result || $run > self::MAX_TRIES) {
-            return $data;
-        }
-
-        sleep(3);
-
-        return $this->runnerTask($id, $fn, ++$run);
-    }
-
     private function preview(string $timestamp): array
     {
         return (array) $this->httpClient->post(
@@ -35,21 +15,21 @@ class ImportService extends AbstractService
         );
     }
 
-    private function policy(string $timestamp): array
+    private function policy(string $timestamp): object
     {
-        return (array) $this->httpClient->post(
+        return (object) $this->httpClient->post(
             "policies/push/import/message",
             [ "messageId" => $timestamp ],
             true
         );
     }
 
-    public function fromTimestamp(callable $callback, string $timestamp)
+    public function fromTimestamp(callable $callback, string $timestamp): TaskInstance
     {
         $callback($timestamp);
 
-        $import = (object) $this->policy($timestamp);
+        $import = TaskInstance::from($this->policy($timestamp));
 
-        $this->runnerTask($import->taskId, $callback);
+        return $this->runnerTask($import, $callback);
     }
 }
