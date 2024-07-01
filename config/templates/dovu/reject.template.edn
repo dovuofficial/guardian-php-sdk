@@ -1,0 +1,4 @@
+{
+    :status "Dovu\\GuardianPhpSdk\\Constants\\EntityStatus::REJECTED"
+    :option "Dovu\\GuardianPhpSdk\\Constants\\GuardianApprovalOption::DENY"
+}
