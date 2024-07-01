@@ -62,7 +62,7 @@ class PolicyConfiguration
                 $schema_spec = (new PolicySchemaDocument($document))->schemaValidationSpecification();
             }
 
-//            $item->schema_specification = $schema_spec;
+            //            $item->schema_specification = $schema_spec;
 
             $specification[] = [
                 ...(array) $item,
