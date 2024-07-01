@@ -52,7 +52,7 @@ class PolicyConfiguration
 
         foreach ($workflow as $item) {
 
-            $block = $this->findBlocksByTag($this->config(), $item['tag']);
+            $block = $this->findBlocksByTag($this->config(), $item->tag);
             $schema_spec = [];
 
             if ($block->schema) {
@@ -62,8 +62,10 @@ class PolicyConfiguration
                 $schema_spec = (new PolicySchemaDocument($document))->schemaValidationSpecification();
             }
 
+//            $item->schema_specification = $schema_spec;
+
             $specification[] = [
-                ...$item,
+                ...(array) $item,
 //                "block" => $block, // might be removed
                 "schema_specification" => $schema_spec,
             ];
