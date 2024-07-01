@@ -1,6 +1,8 @@
 <?php
 
 use Dovu\GuardianPhpSdk\Service\AccountService;
+use Dovu\GuardianPhpSdk\Service\BlockService;
+use Dovu\GuardianPhpSdk\Service\DryRunService;
 use Dovu\GuardianPhpSdk\Service\MrvService;
 use Dovu\GuardianPhpSdk\Service\PolicyService;
 use Dovu\GuardianPhpSdk\Service\StateService;
@@ -21,6 +23,8 @@ return [
         'policies' => PolicyService::class,
         'mrv' => MrvService::class,
         'state' => StateService::class,
+        'dry_run' => DryRunService::class,
+        'block' => BlockService::class,
     ],
 ];
 

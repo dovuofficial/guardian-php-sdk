@@ -9,14 +9,20 @@
     "authors": [
         {
             "name": "Jonathan Wood",
-            "email": "jonathan.wood@dovu.io",
+            "email": "jon@dovu.earth",
+            "role": "Developer"
+        },
+        {
+            "name": "Matthew Smithies",
+            "email": "matt@dovu.earth",
             "role": "Developer"
         }
     ],
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.4",
-        "nesbot/carbon": "^2.60"
+        "nesbot/carbon": "^2.60",
+        "vlucas/phpdotenv": "^5.6"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",

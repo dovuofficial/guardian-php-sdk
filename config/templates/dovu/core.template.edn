@@ -1,0 +1,82 @@
+;; EXPERIMENTAL (DOVU OS) Language v0.0.2
+;;
+;; Minimise cost for getting credits to market through a simple and repeatable template process.
+;;
+;; Encapsulate the overarching process of how credits are created and managed, use this process to branch
+;; for specific methodologies.
+;;
+;; This is an example template that would encapsulate policies for a particular registries
+;; The goal here would be to describe how a policy process can be navigated where the schema don't matter
+[
+    {
+        :role :supplier
+        :tag :create_ecological_project
+        :type :data
+        :key :create-project
+    }
+    {
+        :role :owner
+        :filter {
+            :tag :supplier_grid_filter
+            :key :uuid
+        }
+        :source_tag :supplier_grid
+        :tag :approve_supplier_btn
+        :options [
+            :approve.template
+            :reject.template
+        ]
+        :type :approval
+        :key :approve-project
+    }
+    {
+        :role :supplier
+        :tag :create_site_form
+        :source_tag :create_site_form
+        :type :data
+        :allow_many true
+        :key :register-site
+    }
+    {
+        :role :owner
+        :filter {
+            :tag :site_grid_owner_filter
+            :key :uuid
+        }
+        :source_tag :approve_sites_grid
+        :tag :approve_site_button
+        :options [
+            :approve.template
+            :reject.template
+        ]
+        :type :approval
+        :key :approve-site
+    }
+    {
+        :role :supplier
+        :tag :create_claim_request_form
+        :filter {
+            :tag :site_grid_supplier_filter
+            :key :uuid
+        }
+        :source_tag :sites_grid
+        :type :data
+        :allow_many true
+        :key :create-claim
+    }
+    {
+        :role :verifier
+        :filter {
+            :tag :claim_request_verifier_filter
+            :key :uuid
+        }
+        :source_tag "claim_requests_grid(verifier)"
+        :tag :approve_claim_requests_btn
+        :options [
+            :approve.template
+            :reject.template
+        ]
+        :type :approval
+        :key :approve-claim
+    }
+]
