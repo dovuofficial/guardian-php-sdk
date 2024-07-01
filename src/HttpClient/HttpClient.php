@@ -116,11 +116,15 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function put(string $uri, array $payload = []): bool|array|Exception|null
+    public function put(string $uri, array $payload = [], bool $jsonRequest = false): bool|array|Exception|null
     {
         $this->method = HttpMethod::PUT;
 
         $this->body = ['form_params' => $payload];
+
+        if ($jsonRequest) {
+            $this->body = ['json' => $payload];
+        }
 
         $this->hmac = $this->setHmac($uri, $payload);
 
