@@ -530,32 +530,27 @@ describe('Functional Guardian Test', function () {
          * account, in prod/testnet this would be part of the process.
          */
 
-        // Create new user
-        //        $registry_user = "registry:" . Uuid::uuid4();
+        $config = EnvConfig::instance();
+        $has_registry = $config->hasStandardRegistry();
 
-        $registry_user = 'registry:3b0af58b-b3ee-400f-98d4-279d8c57a548';
-        $password = '123456';
+        $registry_user = $has_registry ? $config->get(Env::STANDARD_REGISTRY_USERNAME) : "registry:" . Uuid::uuid4();
+        $password = $has_registry ? $config->get(Env::STANDARD_REGISTRY_PASSWORD) : '123456';
 
-        //        $this->helper->authenticateAsRegistry($registry_user, $password);
+        if (! $has_registry) {
+            $register = $this->actor_facade->newRegistryAccount($registry_user, $password);
 
-        //        return;
+            ray("new registry user");
+            ray($register);
 
-        //        $register = $this->actor_facade->newRegistryAccount($registry_user, $password);
-        //
-        //        ray($register);
-        //
-        //        $this->helper->authenticateAsRegistry($registry_user, $password);
-        //
-        ////        $env = EnvConfig::instance();
-        ////        ray($env->get(Env::HEDERA_ACCOUNT_ID));
-        //
-        //        $hedera_account = $this->actor_facade->generateDemoKey();
-        //
-        //        ray($hedera_account);
-        //
-        //        $task = $this->actor_facade->addHederaAccountToActor($registry_user, $hedera_account);
-        //
-        //        ray($task);
+            $this->helper->authenticateAsRegistry($registry_user, $password);
+
+            $hedera_account = $this->actor_facade->generateDemoKey();
+            $task = $this->actor_facade->addHederaAccountToActor($registry_user, $hedera_account);
+
+            ray("addHederaAccountToActor");
+            ray($task);
+        }
+
 
         $this->helper->authenticateAsRegistry($registry_user, $password);
 
@@ -564,35 +559,40 @@ describe('Functional Guardian Test', function () {
          */
         $conf = GuardianWorkflowConfiguration::prepare('test_workflow');
 
-        /*
-         * Using timestamp value from "test_workflow" that is the concrete implementation
-         * of a given workflow template
-         */
-        $timestamp = $conf->timestamp();
+        $policy_id = $config->testLocalPolicy();
 
-        expect($timestamp)->toBeTruthy();
+        if (! $policy_id) {
 
-        // When something happens, complete
-        $status_update_callable = function ($state) {
-            ray("Status update");
-            ray($state);
+            /*
+             * Using timestamp value from "test_workflow" that is the concrete implementation
+             * of a given workflow template
+             */
+            $timestamp = $conf->timestamp();
 
-            if ($state->result) {
-                ray("done");
-                ray($state->result);
+            expect($timestamp)->toBeTruthy();
 
-                expect($state->result["policyId"])->toBeTruthy();
-            }
-        };
+            // When something happens, complete
+            $status_update_callable = function ($state) {
+                ray("Status update");
+                ray($state);
 
-        $task = $this->policy_workflow->context->import->fromTimestamp($status_update_callable, $timestamp);
+                if ($state->result) {
+                    ray("done");
+                    ray($state->result);
 
-        ray($task);
+                    expect($state->result["policyId"])->toBeTruthy();
+                }
+            };
 
-        $policy_id = $task->result["policyId"];
+            $task = $this->policy_workflow->context->import->fromTimestamp($status_update_callable, $timestamp);
 
-        // TODO: remove, context "used on matt's machine" (to comment out import flow)
-        //        $policy_id = "6682a6c3f14d4f12d4382494";
+            ray('policy_workflow->context->import->fromTimestamp');
+            ray($task);
+
+            $policy_id = $task->result["policyId"];
+        }
+
+        expect($policy_id)->toBeTruthy();
 
         $context = PolicyContext::using($this->sdk)->for($policy_id);
 
@@ -630,7 +630,9 @@ describe('Functional Guardian Test', function () {
         $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
         $user = (object) end($users);
         $this->dry_run_scenario->login($user->did);
-        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+        $role = $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
+
+        ray($role);
 
         /**
          * Build an object for the particular action
