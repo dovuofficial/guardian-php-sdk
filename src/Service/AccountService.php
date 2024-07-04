@@ -12,7 +12,7 @@ class AccountService extends AbstractService
         return (object) $this->httpClient->post('accounts/login', [
                 'username' => $username,
                 'password' => $password,
-        ], true);
+        ], true)->data();
     }
 
     public function register($username, $password, GuardianRole $role): object
@@ -22,7 +22,7 @@ class AccountService extends AbstractService
                 'password' => $password,
                 'password_confirmation' => $password,
                 'role' => $role->value,
-        ], true);
+        ], true)->data();
     }
 
     /**
@@ -32,12 +32,12 @@ class AccountService extends AbstractService
     {
         $response = (object) $this->httpClient->put("profiles/push/$username", $data, true);
 
-        return TaskInstance::from($response);
+        return TaskInstance::from($response->data());
     }
 
     public function session(): object
     {
-        return (object) $this->httpClient->get('accounts/session');
+        return (object) $this->httpClient->get('accounts/session')->data();
     }
 
     /**
@@ -47,7 +47,7 @@ class AccountService extends AbstractService
     {
         $response = (object) $this->httpClient->get('demo/push/random-key');
 
-        return TaskInstance::from($response);
+        return TaskInstance::from($response->data());
     }
 
     public function create($username, $password)
@@ -55,18 +55,18 @@ class AccountService extends AbstractService
         return $this->httpClient->post('accounts', [
                 'username' => $username,
                 'password' => $password,
-        ], true);
+        ], true)->data();
     }
 
     public function token($refresh_token): object
     {
         return (object) $this->httpClient->post('accounts/access-token', [
             'refreshToken' => $refresh_token,
-        ], true);
+        ], true)->data();
     }
 
     public function role($policyId, $roleType)
     {
-        return $this->httpClient->post("policies/{$policyId}/role/{$roleType}");
+        return $this->httpClient->post("policies/{$policyId}/role/{$roleType}")->data();
     }
 }

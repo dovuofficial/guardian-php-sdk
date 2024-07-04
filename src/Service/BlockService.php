@@ -10,7 +10,7 @@ class BlockService extends AbstractService
 {
     public function dataByTag(string $policyId, string $tag): object
     {
-        return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks");
+        return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks")->data();
     }
 
     public function dataByTagToCredentialBlock(string $policyId, string $tag, EntityStatus $status = null): CredentialDocumentBlock
@@ -28,22 +28,22 @@ class BlockService extends AbstractService
 
         return (object) $this->httpClient->post("policies/{$policyId}/tag/{$tag}/blocks", [
             'filterValue' => $uuid,
-        ], true);
+        ], true)->data();
     }
 
     public function dataById(string $policyId, string $id): array
     {
-        return $this->httpClient->get("policies/{$policyId}/blocks/");
+        return $this->httpClient->get("policies/{$policyId}/blocks/")->data();
     }
 
     public function fromTag(string $policyId, string $tag): object
     {
-        return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}");
+        return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}")->data();
     }
 
     public function sendToTag(string $policyId, string $tag, $data): object
     {
-        return (object) $this->httpClient->post("policies/{$policyId}/tag/{$tag}/blocks", (array) $data, true);
+        return (object) $this->httpClient->post("policies/{$policyId}/tag/{$tag}/blocks", (array) $data, true)->data();
     }
 
     public function assignRole(string $policyId, GuardianRole $role)
@@ -57,6 +57,6 @@ class BlockService extends AbstractService
          *
          * TODO: Consider building a HTTP response DTO.
          */
-        return $this->sendToTag($policyId, 'choose_role', $data)->scalar;
+        return $this->sendToTag($policyId, 'choose_role', $data);
     }
 }

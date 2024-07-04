@@ -6,12 +6,12 @@ class PolicyService extends AbstractService
 {
     public function all(): array
     {
-        return $this->httpClient->get('policies');
+        return $this->httpClient->get('policies')->data();
     }
 
     public function get($id): object
     {
-        return (object) $this->httpClient->get("policies/{$id}");
+        return (object) $this->httpClient->get("policies/{$id}")->data();
     }
 
     /**

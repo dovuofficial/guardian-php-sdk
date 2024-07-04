@@ -12,7 +12,7 @@ class ImportService extends AbstractService
             "policies/push/import/message/preview",
             [ "messageId" => $timestamp ],
             true
-        );
+        )->data();
     }
 
     private function policy(string $timestamp): object
@@ -21,7 +21,7 @@ class ImportService extends AbstractService
             "policies/push/import/message",
             [ "messageId" => $timestamp ],
             true
-        );
+        )->data();
     }
 
     public function fromTimestamp(callable $callback, string $timestamp): TaskInstance

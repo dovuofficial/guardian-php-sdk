@@ -13,7 +13,7 @@ class AbstractService
 
     protected function task(string $id): array
     {
-        return (array) $this->httpClient->get("tasks/$id");
+        return (array) $this->httpClient->get("tasks/$id")->data();
     }
 
     /**

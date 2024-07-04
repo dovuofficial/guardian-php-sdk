@@ -43,7 +43,7 @@ class PolicyWorkflow
         return $this->context->block->filterByTag($this->context->policyId, $tag, $uuid);
     }
 
-    public function assignRole(GuardianRole $role): bool
+    public function assignRole(GuardianRole $role): object
     {
         return $this->context->block->assignRole($this->context->policyId, $role);
     }
