@@ -15,6 +15,7 @@ class StateService extends AbstractService
     protected array $filters = [];
 
     /**
+     * @deprecated v3 release
      *
      * @param string $policyId
      * @param StateQuery $query
