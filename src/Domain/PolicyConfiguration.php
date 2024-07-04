@@ -55,14 +55,12 @@ class PolicyConfiguration
             $block = $this->findBlocksByTag($this->config(), $item->tag);
             $schema_spec = [];
 
-            if ($block->schema) {
+            if (isset($block->schema)) {
                 $raw_schema = $this->workflow->getSchemaForKey($block->schema);
                 $document = json_decode($raw_schema->document, true);
 
                 $schema_spec = (new PolicySchemaDocument($document))->schemaValidationSpecification();
             }
-
-            //            $item->schema_specification = $schema_spec;
 
             $specification[] = [
                 ...(array) $item,
