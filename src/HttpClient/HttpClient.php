@@ -4,6 +4,7 @@ namespace Dovu\GuardianPhpSdk\HttpClient;
 
 use Dovu\GuardianPhpSdk\Constants\HttpMethod;
 use Dovu\GuardianPhpSdk\Contracts\HttpClientInterface;
+use Dovu\GuardianPhpSdk\Domain\HttpClientResponse;
 use Dovu\GuardianPhpSdk\Exceptions\FailedActionException;
 use Dovu\GuardianPhpSdk\Exceptions\NotFoundException;
 use Dovu\GuardianPhpSdk\Exceptions\UnauthorizedException;
@@ -39,7 +40,7 @@ class HttpClient implements HttpClientInterface
         ]);
     }
 
-    public function request(string $uri)
+    public function request(string $uri): HttpClientResponse
     {
         $payload = $this->body ?? null;
 
@@ -55,7 +56,6 @@ class HttpClient implements HttpClientInterface
             $payload['headers']['Authorization'] = "Bearer {$this->apiToken}";
         }
 
-
         $response = $this->client->request(
             strtoupper($this->method->value),
             $uri,
@@ -67,32 +67,18 @@ class HttpClient implements HttpClientInterface
                 $this->handleRequestError($response);
             }
 
-            $body = (string) $response->getBody();
+            return HttpClientResponse::with($response);
 
-            //            if (is_bool((bool) $body)) {
-            //                return [
-            //                    "result" => $body,
-            //                ];
-            //            }
-            //            $res['status_code'] = $response->getStatusCode();
-            //            $res['reason'] = $response->getReasonPhrase();
-
-            return json_decode((string) $response->getBody(), true);
-
-            if (is_null($body)) {
-                return [];
-            }
-
-            return array_merge([], $body);
         } catch (\Exception $e) {
             $notificationManager = new NotificationManager($this->settings);
             $notificationManager->register($e);
 
-            return $e;
+            return HttpClientResponse::exception($e);
         }
     }
 
-    public function get(string $uri): bool|array|Exception|null
+    //    public function get(string $uri): bool|array|Exception|null
+    public function get(string $uri): HttpClientResponse
     {
         $this->method = HttpMethod::GET;
 
@@ -101,7 +87,7 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function post(string $uri, array $payload = [], bool $jsonRequest = false): bool|array|Exception|null
+    public function post(string $uri, array $payload = [], bool $jsonRequest = false): HttpClientResponse
     {
         $this->method = HttpMethod::POST;
 
@@ -116,7 +102,7 @@ class HttpClient implements HttpClientInterface
         return $this->request($uri);
     }
 
-    public function put(string $uri, array $payload = [], bool $jsonRequest = false): bool|array|Exception|null
+    public function put(string $uri, array $payload = [], bool $jsonRequest = false): HttpClientResponse
     {
         $this->method = HttpMethod::PUT;
 
