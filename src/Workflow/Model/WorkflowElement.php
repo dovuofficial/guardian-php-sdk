@@ -39,7 +39,7 @@ class WorkflowElement
 
     public function hasFilter(): bool
     {
-        return ! ! $this->item->filter;
+        return ! ! ($this->item->filter ?? null);
     }
 
     public function getFilter(): object
@@ -54,6 +54,6 @@ class WorkflowElement
 
     public function sourceTag(): ?string
     {
-        return $this->item->source_tag;
+        return $this->item->source_tag ?? null;
     }
 }
