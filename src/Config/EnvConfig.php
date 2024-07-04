@@ -31,4 +31,14 @@ class EnvConfig
     {
         return $this->array[$item->value];
     }
+
+    public function hasStandardRegistry(): bool
+    {
+        return (bool) $this->get(Env::STANDARD_REGISTRY_USERNAME);
+    }
+
+    public function testLocalPolicy(): string|null
+    {
+        return $this->get(Env::POLICY_ID);
+    }
 }
