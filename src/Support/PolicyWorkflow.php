@@ -32,7 +32,7 @@ class PolicyWorkflow
         return $this->context->block->dataByTag($this->context->policyId, $tag);
     }
 
-    public function dataByTagToDocumentBlock($tag, EntityStatus $status = null): CredentialDocumentBlock
+    public function dataByTagToDocumentBlock($tag, EntityStatus $status = null): ?CredentialDocumentBlock
     {
         return $this->context->block->dataByTagToCredentialBlock($this->context->policyId, $tag, $status);
     }
