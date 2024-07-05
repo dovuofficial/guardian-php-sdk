@@ -607,6 +607,8 @@ describe('Functional Guardian Test', function () {
         $configuration = $this->policy_workflow->getConfiguration();
         $specification = $configuration->generateWorkflowSpecification($conf->workflow);
 
+//        return ray($specification);
+
         // Do the thing!
         $this->helper->authenticateAsRegistry($registry_user);
 
@@ -626,13 +628,13 @@ describe('Functional Guardian Test', function () {
 
         /**
          * Stage one: create an ecological project (identity handled outside)
+         *
+         * TODO: this is a "dry-run" scenario -- so this would need to be changed for a testnet user
          */
         $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
         $user = (object) end($users);
         $this->dry_run_scenario->login($user->did);
-        $role = $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
-
-        ray($role);
+        $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
 
         /**
          * Build an object for the particular action
@@ -649,8 +651,6 @@ describe('Functional Guardian Test', function () {
         ray('$send_ecological');
         ray($result);
 
-        // TODO: Use the listener logic (This will increase based off of the current resource load on API)
-        sleep(2);
 
         // Retain reference to admin
         // As standard authority (first in the list of dry run users)
@@ -664,15 +664,12 @@ describe('Functional Guardian Test', function () {
         $approve_ecological = (object) $specification[1];
         $element = WorkflowElement::parse($approve_ecological);
 
-
         // TODO: This would be the "plucker" (can we make this more dynamic?)
         $result = GuardianActionTransaction::with($mediator)
             ->setWorkflowElement($element)
             ->setFilterValue($project['uuid'])
             ->setApprovalOption(ApprovalOption::APPROVE)
             ->run();
-
-        sleep(2);
 
         ray('$approve_ecological');
         ray($result);
@@ -687,12 +684,12 @@ describe('Functional Guardian Test', function () {
 
         $site = json_decode($site, true);
 
+        ray('Attempt $create_site');
+
         $result = GuardianActionTransaction::with($mediator)
             ->setWorkflowElement($element)
             ->setPayload($site)
             ->run();
-
-        sleep(2);
 
         ray('$create_site');
         ray($result);
@@ -710,8 +707,6 @@ describe('Functional Guardian Test', function () {
             ->setApprovalOption(ApprovalOption::APPROVE)
             ->setFilterValue($site['uuid'])
             ->run();
-
-        sleep(2);
 
         ray('$approve_site');
         ray($result);
@@ -731,8 +726,6 @@ describe('Functional Guardian Test', function () {
             ->setPayload($claim)
             ->setFilterValue($site['uuid'])
             ->run();
-
-        sleep(2);
 
         ray('$create_claim');
         ray($result);
@@ -762,8 +755,6 @@ describe('Functional Guardian Test', function () {
             ->setApprovalOption(ApprovalOption::APPROVE)
             ->setFilterValue($claim['uuid'])
             ->run();
-
-        sleep(2);
 
         ray('$approve_claim');
         ray($result);
