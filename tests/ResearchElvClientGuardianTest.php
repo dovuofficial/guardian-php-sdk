@@ -607,7 +607,7 @@ describe('Functional Guardian Test', function () {
         $configuration = $this->policy_workflow->getConfiguration();
         $specification = $configuration->generateWorkflowSpecification($conf->workflow);
 
-//        return ray($specification);
+        //        return ray($specification);
 
         // Do the thing!
         $this->helper->authenticateAsRegistry($registry_user);
