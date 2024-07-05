@@ -2,6 +2,7 @@
 
 namespace Dovu\GuardianPhpSdk\Workflow\Model;
 
+use Dovu\GuardianPhpSdk\Support\EntityStateWaitingQuery;
 use Dovu\GuardianPhpSdk\Workflow\Constants\ApprovalOption;
 use Dovu\GuardianPhpSdk\Workflow\GuardianActionMediator;
 
@@ -14,6 +15,8 @@ class GuardianActionTransaction
     public GuardianActionMediator $mediator;
 
     public ?ApprovalOption $approvalOption = null;
+
+    public ?EntityStateWaitingQuery $entityStateWaitingQuery = null;
 
     public ?string $filter_value = null;
 
@@ -28,6 +31,23 @@ class GuardianActionTransaction
     public static function with(GuardianActionMediator $mediator): self
     {
         return new self($mediator);
+    }
+
+    /**
+     * To overcome any potential race conditions, in regard to acting upon a particular entity for the next stage of a policy.
+     *
+     * This method provides the capability to ensure that a given entity within the Guardian workflow process has reached a particular status.
+     *
+     * When set, the EntityStateWaitingQuery Scans for an entity that has been set to a particular status, and will listen for ongoing updates.
+     *
+     * @param EntityStateWaitingQuery $waitingQuery
+     * @return $this
+     */
+    public function ensureEntityState(EntityStateWaitingQuery $waitingQuery): self
+    {
+        $this->entityStateWaitingQuery = $waitingQuery;
+
+        return $this;
     }
 
     /**
