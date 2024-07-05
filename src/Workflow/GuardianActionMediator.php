@@ -16,7 +16,7 @@ class GuardianActionMediator
     ) {
     }
 
-    // This will included the Policy workflow
+    // This will include the Policy workflow
     public static function with(PolicyWorkflow $workflow): GuardianActionMediator
     {
         return new self($workflow);
