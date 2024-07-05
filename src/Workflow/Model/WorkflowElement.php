@@ -42,6 +42,16 @@ class WorkflowElement
         return ! ! ($this->item->filter ?? null);
     }
 
+    public function hasRequirement(): bool
+    {
+        return ! ! ($this->item->require ?? null);
+    }
+
+    public function statusRequirement(): ?string
+    {
+        return ($this->item?->require?->status ?? null);
+    }
+
     public function getFilter(): object
     {
         return (object) $this->item->filter;
