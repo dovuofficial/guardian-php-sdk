@@ -13,11 +13,16 @@ class BlockService extends AbstractService
         return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks")->data();
     }
 
-    public function dataByTagToCredentialBlock(string $policyId, string $tag, EntityStatus $status = null): CredentialDocumentBlock
+    public function dataByTagToCredentialBlock(string $policyId, string $tag, EntityStatus $status = null): ?CredentialDocumentBlock
     {
         $data = $this->dataByTag($policyId, $tag);
 
+        if (! $data->data) {
+            return null;
+        }
+
         return new CredentialDocumentBlock($data, $status);
+
     }
 
     // Might not work due to tag instead of blocks
