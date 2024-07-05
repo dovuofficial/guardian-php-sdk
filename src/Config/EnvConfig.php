@@ -29,7 +29,7 @@ class EnvConfig
 
     public function get(Env $item)
     {
-        return $this->array[$item->value];
+        return $this->array[$item->value] ?? null;
     }
 
     public function hasStandardRegistry(): bool
