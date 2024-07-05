@@ -16,6 +16,9 @@
     }
     {
         :role :owner
+        :require {
+           :status :waiting
+        }
         :filter {
             :tag :supplier_grid_filter
             :key :uuid
@@ -31,6 +34,9 @@
     }
     {
         :role :supplier
+        :require {
+            :status :approved
+        }
         :tag :create_site_form
         :source_tag :create_site_form
         :type :data
@@ -39,6 +45,9 @@
     }
     {
         :role :owner
+        :require {
+           :status :waiting
+        }
         :filter {
             :tag :site_grid_owner_filter
             :key :uuid
@@ -54,6 +63,9 @@
     }
     {
         :role :supplier
+        :require {
+           :status :approved
+        }
         :tag :create_claim_request_form
         :filter {
             :tag :site_grid_supplier_filter
@@ -66,6 +78,9 @@
     }
     {
         :role :verifier
+        :require {
+           :status :waiting
+        }
         :filter {
             :tag :claim_request_verifier_filter
             :key :uuid
