@@ -20,6 +20,17 @@ describe('Workflow template import using Jet', function () {
             expect($elem->tag)->toBeTruthy();
             expect($elem->type)->toBeTruthy();
 
+            if (isset($elem->filter)) {
+                expect($elem->filter)->toBeTruthy();
+                expect($elem->filter->tag)->toBeTruthy();
+                expect($elem->filter->key)->toBeTruthy();
+            }
+
+            if (isset($elem->source_tag)) {
+                expect($elem->source_tag)->toBeTruthy();
+                expect($elem->require->status)->toBeTruthy();
+            }
+
             if ($elem->type === WorkflowTask::DATA) {
                 expect($elem->role)->toBe(GuardianRole::SUPPLIER);
             }
