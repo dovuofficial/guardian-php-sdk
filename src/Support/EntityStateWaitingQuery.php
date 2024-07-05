@@ -26,7 +26,7 @@ class EntityStateWaitingQuery
      * Time in seconds where the listener will wait before
      * @var int
      */
-    public int $wait_seconds = 10;
+    public int $wait_seconds = 2;
 
     /**
      * Set the status of entity searching for, default to a "waiting"
@@ -45,7 +45,7 @@ class EntityStateWaitingQuery
      * Maximum number of tries to query the
      * @var int
      */
-    public int $tries = 20;
+    public int $tries = 40;
 
     /**
      * Keep track of all attempts for waiting for query state
