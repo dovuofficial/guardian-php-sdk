@@ -80,6 +80,13 @@ class GuardianWorkflowConfiguration
                 $step->options = $options;
             }
 
+            if (isset($step->require)) {
+                if (isset($step->require->status)) {
+                    $status = strtoupper($step->require->status);
+                    $step->require->status = constant("Dovu\GuardianPhpSdk\Constants\EntityStatus::$status")->value;
+                }
+            }
+
             return $step;
         };
 
