@@ -121,6 +121,11 @@ class CredentialDocumentBlock
         return $this->block_data['option']['status'];
     }
 
+    public function hasExpectedStatus(string $status): bool
+    {
+        return $this->getStatus() === $status;
+    }
+
     public function getHash(): string
     {
         return $this->block_data['hash'];
