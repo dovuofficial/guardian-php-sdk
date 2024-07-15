@@ -17,7 +17,6 @@ use Dovu\GuardianPhpSdk\Workflow\Model\GuardianActionTransaction;
 use Dovu\GuardianPhpSdk\Workflow\Model\WorkflowElement;
 use Ramsey\Uuid\Uuid;
 
-
 describe('Functional Guardian Test', function () {
     beforeEach(function () {
         $this->sdk = new DovuGuardianAPI();
