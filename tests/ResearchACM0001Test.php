@@ -17,52 +17,6 @@ use Dovu\GuardianPhpSdk\Workflow\Model\GuardianActionTransaction;
 use Dovu\GuardianPhpSdk\Workflow\Model\WorkflowElement;
 use Ramsey\Uuid\Uuid;
 
-/********************************************* OVERVIEW *************************************************
- * This test suite is designed to demonstrate and validate key functionalities of the DOVU Guardian SDK.
- * It includes:
- *
- * 1) An end-to-end test showcasing the complete process from user creation, through policy creation,
- *    to the final minting step. This test provides a comprehensive view of the SDK's workflow.
- *
- * 2) Individual tests marked with a "skip" status. These serve as templates for developing custom
- *    test cases. They include hints and guidelines to assist in understanding and extension.
- *
- * Overall, the suite aims to offer both a holistic understanding of the SDK's capabilities and
- * specific insights into each component's functionality. It complements our Gitbook documentation,
- * providing developers with practical, code-based examples and additional technical details.
- *******************************************************************************************************/
-
-dataset('participant', [
-
-]);
-
-dataset('vvb', [
-
-]);
-
-dataset('project', [
-
-]);
-
-dataset('report', [
-
-]);
-
-/********************************** FUTURE SCOPE *************************************
- * Future Enhancements for Dynamic Testing:
- *
- * This test suite sets the foundation for advanced, dynamic testing capabilities. In the future,
- * clients will have the ability to inject their own schemas at different stages of the workflow.
- * This feature will enable clients to:
- *
- * 1) Test with both seeded data and their own custom data, ensuring flexibility and adaptability.
- * 2) Validate if the policy can be successfully deployed within their specific context.
- * 3) Confirm that the data being processed aligns with their expectations and requirements.
- *
- * This progression towards dynamic testing will enhance the SDK's utility, making it more
- * versatile and user-friendly. It will allow clients to not just test but also tailor the
- * system to their unique environmental and ecological credit scenarios.
- **************************************************************************************/
 
 describe('Functional Guardian Test', function () {
     beforeEach(function () {
@@ -109,7 +63,7 @@ describe('Functional Guardian Test', function () {
         expect($session->refreshToken)->toBeTruthy();
     })->skip();
 
-    it('Using SDK builder methods to create registry, import, navigate and process the entire dryrun flow.', function ($participant, $vvb, $project, $report) {
+    it('Using SDK builder methods to create registry, import, navigate and process the entire dryrun flow.', function () {
 
 
         /***
@@ -359,4 +313,4 @@ describe('Functional Guardian Test', function () {
 
     });//->skip();
 
-})->with('project', 'site', 'claim');
+});
