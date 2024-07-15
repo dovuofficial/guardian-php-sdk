@@ -1,0 +1,29 @@
+;; ACM001 example schema extraction template for API consumption
+;;
+;; "vendor/bin/pest --filter ResearchACM0001Test"
+[
+    {
+        :role :participant
+        :tag :create_pp_profile
+        :type :data
+        :key :create-particpant-profile
+    }
+    {
+        :role :vvb
+        :tag :new_VVB
+        :type :data
+        :key :create-vvb-profile
+    }
+    {
+        :role :participant
+        :tag :add_project_bnt
+        :type :data
+        :key :partipant-add-project
+    }
+    {
+        :role :participant
+        :tag :add_report_bnt
+        :type :data
+        :key :partipant-add-report
+    }
+]
