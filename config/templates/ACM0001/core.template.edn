@@ -10,7 +10,7 @@
     }
     {
         :role :vvb
-        :tag :new_VVB
+        :tag :create_new_vvb
         :type :data
         :key :create-vvb-profile
     }
