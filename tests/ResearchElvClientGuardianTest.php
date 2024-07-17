@@ -180,7 +180,7 @@ describe('Functional Guardian Test', function () {
         expect($register->username)->toBeTruthy();
         expect($register->permissions)->toBeTruthy();
         expect($register->permissionsGroup)->toBeTruthy();
-//        expect($register->did)->toBeFalsy();
+        //        expect($register->did)->toBeFalsy();
         expect($register->permissionsGroup[0]["roleName"])->toBe("Default policy user");
     });
 
