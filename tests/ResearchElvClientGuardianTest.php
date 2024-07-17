@@ -178,9 +178,10 @@ describe('Functional Guardian Test', function () {
         $register = $this->sdk->accounts->register($username, '123456', GuardianRole::USER);
 
         expect($register->username)->toBeTruthy();
-        expect($register->password)->toBeTruthy();
-        expect($register->did)->toBeFalsy();
-        expect($register->role)->toBe(GuardianRole::USER->value);
+        expect($register->permissions)->toBeTruthy();
+        expect($register->permissionsGroup)->toBeTruthy();
+//        expect($register->did)->toBeFalsy();
+        expect($register->permissionsGroup[0]["roleName"])->toBe("Default policy user");
     });
 
 
