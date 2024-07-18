@@ -5,7 +5,10 @@ use Dovu\GuardianPhpSdk\Service\BlockService;
 use Dovu\GuardianPhpSdk\Service\DryRunService;
 use Dovu\GuardianPhpSdk\Service\MrvService;
 use Dovu\GuardianPhpSdk\Service\PolicyService;
+use Dovu\GuardianPhpSdk\Service\SchemaService;
 use Dovu\GuardianPhpSdk\Service\StateService;
+use Dovu\GuardianPhpSdk\Service\TrustchainService;
+use Dovu\GuardianPhpSdk\Service\ImportService;
 
 return [
 
@@ -25,6 +28,9 @@ return [
         'state' => StateService::class,
         'dry_run' => DryRunService::class,
         'block' => BlockService::class,
+        'schema' => SchemaService::class,
+        'import' => ImportService::class,
+        'trustchain' => TrustchainService::class,
     ],
 ];
 
