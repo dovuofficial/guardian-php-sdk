@@ -37,24 +37,28 @@ class PaladinBlockElement
     public function setRole(?GuardianRole $role): self
     {
         $this->role = $role;
+
         return $this;
     }
 
     public function setTag(?string $tag): self
     {
         $this->tag = $tag;
+
         return $this;
     }
 
     public function setWorkflowTask(?WorkflowTask $workflowTask): self
     {
         $this->type = $workflowTask;
+
         return $this;
     }
 
     public function setKey(?string $key): self
     {
         $this->key = $key;
+
         return $this;
     }
 }
