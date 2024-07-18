@@ -31,9 +31,9 @@ class PaladinConfiguration
     {
         return (object) [
             "config" => [
-                "template" => $this->template
+                "template" => $this->template,
             ],
-            "workflow" => $this->blocks
+            "workflow" => $this->blocks,
         ];
     }
 }
