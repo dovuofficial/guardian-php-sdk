@@ -46,7 +46,12 @@ class PolicyConfiguration
         return $result;
     }
 
-    public function generateWorkflowSpecification(array $workflow)
+    public function generateBasicWorkflowSpecification(array $workflow)
+    {
+        return $this->generateWorkflowSpecification($workflow, false);
+    }
+
+    public function generateWorkflowSpecification(array $workflow, bool $with_schemas = true)
     {
         $specification = [];
 
@@ -55,7 +60,7 @@ class PolicyConfiguration
             $block = $this->findBlocksByTag($this->config(), $item->tag);
             $schema_spec = [];
 
-            if (isset($block->schema)) {
+            if ($with_schemas && isset($block->schema)) {
                 $raw_schema = $this->workflow->getSchemaForKey($block->schema);
                 $document = json_decode($raw_schema->document, true);
 
