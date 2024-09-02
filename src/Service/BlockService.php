@@ -8,9 +8,31 @@ use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
 
 class BlockService extends AbstractService
 {
-    public function dataByTag(string $policyId, string $tag): object
+    public function dataByTag(string $policyId, string $tag, string $uuid = null): object
     {
-        return (object) $this->httpClient->get("policies/{$policyId}/tag/{$tag}/blocks")->data();
+        $route = "policies/{$policyId}/tag/{$tag}/blocks";
+
+        if ($uuid) {
+            $route .= "?filterByUUID={$uuid}";
+        }
+
+        ray($route);
+
+        return (object) $this->httpClient->get($route)->data();
+    }
+
+    public function dataByTagWithUuid(string $policyId, string $tag, ?string $uuid = null): ?CredentialDocumentBlock
+    {
+        $data = $this->dataByTag($policyId, $tag, $uuid);
+
+        // poop.
+        $data_predicate = $uuid ? $data->data[0] : $data->data['document'];
+
+        if (! $data_predicate) {
+            return null;
+        }
+
+        return new CredentialDocumentBlock($data);
     }
 
     public function dataByTagToCredentialBlock(string $policyId, string $tag, EntityStatus $status = null): ?CredentialDocumentBlock
