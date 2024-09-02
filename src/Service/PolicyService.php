@@ -19,8 +19,8 @@ class PolicyService extends AbstractService
         $payload = [
             "assign" => $assign,
             "policyIds" => [
-                $policy_id
-            ]
+                $policy_id,
+            ],
         ];
 
         return (object) $this->httpClient->post(

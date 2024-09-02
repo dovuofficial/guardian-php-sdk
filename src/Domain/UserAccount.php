@@ -35,7 +35,7 @@ class UserAccount
             "hederaAccountId" => $this->hedera_account->account_id,
             "hederaAccountKey" => $this->hedera_account->private_key,
             "parent" => $this->standard_registry_did,
-            "useFireblocksSigning" => false
+            "useFireblocksSigning" => false,
         ];
 
     }
