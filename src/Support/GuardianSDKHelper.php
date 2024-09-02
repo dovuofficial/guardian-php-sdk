@@ -47,10 +47,15 @@ class GuardianSDKHelper
         return $this->getAccessToken($username, $password);
     }
 
-    public function authenticateAsRegistry($username = 'dovuauthority'): void
+    public function authenticateAsRegistry($username = 'dovuauthority', $password = '123456'): void
     {
-        $token = $this->accessTokenForRegistry($username);
+        $token = $this->accessTokenForRegistry($username, $password);
         $this->setApiKey($token);
+    }
+
+    public function authenticateAsActor($username, $password = '123456'): void
+    {
+        $this->authenticateAsRegistry($username, $password);
     }
 
     public function accessTokenForSupplier($username = 'supplier', $password = 'secret')
