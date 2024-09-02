@@ -32,7 +32,15 @@ class AccountService extends AbstractService
     {
         $response = (object) $this->httpClient->put("profiles/push/$username", $data, true);
 
-        return TaskInstance::from($response->data());
+        return TaskInstance::from((object) $response->data());
+    }
+
+    /**
+     * This is used primarily for the initial key attachment to an actor
+     */
+    public function profile(string $username): object
+    {
+        return (object) $this->httpClient->get("profiles/$username")->data();
     }
 
     public function session(): object
@@ -47,7 +55,7 @@ class AccountService extends AbstractService
     {
         $response = (object) $this->httpClient->get('demo/push/random-key');
 
-        return TaskInstance::from($response->data());
+        return TaskInstance::from((object) $response->data());
     }
 
     public function create($username, $password)
