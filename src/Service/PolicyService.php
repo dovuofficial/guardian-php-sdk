@@ -14,6 +14,22 @@ class PolicyService extends AbstractService
         return (object) $this->httpClient->get("policies/{$id}")->data();
     }
 
+    public function assign(string $username, string $policy_id, bool $assign = true): object
+    {
+        $payload = [
+            "assign" => $assign,
+            "policyIds" => [
+                $policy_id
+            ]
+        ];
+
+        return (object) $this->httpClient->post(
+            "permissions/users/{$username}/policies/assign",
+            $payload,
+            true
+        )->data();
+    }
+
     /**
      *
      * @param string $policyId
