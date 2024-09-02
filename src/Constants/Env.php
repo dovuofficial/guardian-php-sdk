@@ -23,6 +23,11 @@ enum Env: string
     case POLICY_ID = 'POLICY_ID';
 
     /**
+     * A reference to the current guardian API url for interacting with policies.
+     */
+    case GUARDIAN_API_URL = 'GUARDIAN_API_URL';
+
+    /**
      * These standard registry details allow us to work with a local standard
      * registry user without needing to generate new keys for a new user, the
      * impact is that the limited resource of testnet HBARs and facet usage

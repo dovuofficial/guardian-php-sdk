@@ -41,4 +41,9 @@ class EnvConfig
     {
         return $this->get(Env::POLICY_ID);
     }
+
+    public function guardianApiUrl(): string|null
+    {
+        return $this->get(Env::GUARDIAN_API_URL);
+    }
 }
