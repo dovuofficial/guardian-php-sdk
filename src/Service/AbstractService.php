@@ -33,7 +33,7 @@ class AbstractService
         /**
          * TODO: Consider this returns the task, and outside can check if complete/errors
          */
-        if ($data->error) {
+        if (isset($data->error)) {
             $error = (object) $data->error;
             $instance->setError($error);
 
@@ -44,7 +44,7 @@ class AbstractService
             $instance->updateStatuses($data->statuses);
         }
 
-        if ($data->result) {
+        if (isset($data->result)) {
             return $instance->setResult($data->result)->complete();
         }
 
