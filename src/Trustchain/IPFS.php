@@ -3,7 +3,6 @@
 namespace Dovu\GuardianPhpSdk\Trustchain;
 
 use Exception;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp;
 
 enum IPFSGateway: string
@@ -15,8 +14,8 @@ enum IPFSGateway: string
 
 class IPFS
 {
-    const CID_PLACEHOLDER = "__CID__";
-    const REQUEST_TIMEOUT = 1;
+    public const CID_PLACEHOLDER = "__CID__";
+    public const REQUEST_TIMEOUT = 1;
 
     private string $ipfs;
 
@@ -66,10 +65,9 @@ class IPFS
             return (object) [
                 'error' => [
                     'message' => "Expected data from IPFS gateway [$this->ipfs] was not found for CID [$this->cid]",
-                    'query' => $query
-                ]
+                    'query' => $query,
+                ],
             ];
         }
     }
 }
-

@@ -3,8 +3,8 @@
 namespace Dovu\GuardianPhpSdk\Trustchain;
 
 use Exception;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Fluent class for mirrornode requests
@@ -44,6 +44,7 @@ class Mirrornode
 
         return $this;
     }
+
     public function forTestnet()
     {
         $this->setMirrornodeRequestUrl(PublicMirrornodeUrl::TESTNET->value);
@@ -61,7 +62,6 @@ class Mirrornode
     /**
      * This next sequence of methods are static factories, This enables us to set a particular context for the mirrornode query we are making.
      */
-
     public static function credits($token_id): self
     {
         $path = "/tokens/{$token_id}/nfts?limit=100";
@@ -101,8 +101,8 @@ class Mirrornode
         try {
             $response = $client->request('GET', $query, [
                 'headers' => [
-                    'x-api-key' => $this->api_key
-                ]
+                    'x-api-key' => $this->api_key,
+                ],
             ]);
 
             return (object) json_decode($response->getBody());
@@ -116,8 +116,8 @@ class Mirrornode
                     return (object) [
                         'error' => [
                             'message' => "Expected resource was not found, for query ['$query']",
-                            'query' => $query
-                        ]
+                            'query' => $query,
+                        ],
                     ];
                 }
             }
@@ -125,8 +125,8 @@ class Mirrornode
             if ($attempts > $tries) {
                 return (object) [
                     'error' => [
-                        "Hedera Mirrornode Overloaded after {$tries} attempts, unable to process query"
-                    ]
+                        "Hedera Mirrornode Overloaded after {$tries} attempts, unable to process query",
+                    ],
                 ];
             }
 
@@ -146,7 +146,7 @@ class Mirrornode
 
         $next = $response->links->next;
 
-        if (!$next) {
+        if (! $next) {
             return $updated;
         }
 
@@ -207,7 +207,7 @@ class Mirrornode
     {
         $response = $this->retryableRequest($this->mirrornode_request_url, 1);
 
-        return !!$response->account;
+        return ! ! $response->account;
     }
 
     public function setMirrornodeRequestUrl(string $mirror_url): void
@@ -223,4 +223,3 @@ class Mirrornode
         return $this;
     }
 }
-

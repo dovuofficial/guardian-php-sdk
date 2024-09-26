@@ -1,11 +1,8 @@
 <?php
 
 
-use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Trustchain\IPFS;
 use Dovu\GuardianPhpSdk\Trustchain\Mirrornode;
-use Dovu\GuardianPhpSdk\Workflow\Constants\WorkflowTask;
-use Dovu\GuardianPhpSdk\Workflow\GuardianWorkflowConfiguration;
 
 describe('A test suite to match tokens that are minted to data', function () {
 
