@@ -27,7 +27,7 @@ There are a number of items that need continued work in the next couple of weeks
 -[x] Using processes/templates as a mechanism to work with guardian.
 - Ongoing documentation of how to use system
 - Validation of the structure of a guardian workflow element, based on assumptions.
-- Update primary test to ensure that a trustchain can be read through API (possible caching issue)
+- [x] Update primary test to ensure that a trustchain can be read through API (possible caching issue)
 - Update primary test to ensure that the import process for a policy takes place.
 - Update primary test to use "listeners" for waiting for a particular state to be ready
   - Ensure that this call is integrated into a given "workflow" action seemlessly
@@ -48,7 +48,6 @@ There are a number of items that need continued work in the next couple of weeks
 ## These are tasks that have been deferred and classed as low priority
 
 - (Deferred) Ability to ingest any guardian policy and then dynamically infer all tags, roles, and order of operations as well as schemas.
-
 
 ## The current strategic approach
 
@@ -311,6 +310,14 @@ The `setFilterValue` can Be used for any action that requires some kind of filte
 The `setApprovalOption` should only be used in the approval/denial of an entity in a workflow.
 
 The `run` method take all the information provided and attempts to process it as a guardian action (TODO: We will be adding validation to ensure that for a particular action, or the elements have been submitted that the payloads are valid).
+
+# Trustchain and audit of token provenance
+
+After assets have been issued through the garden, you make use the Trustchain class to return all of the Information that can be used to create a visual on outsiders. To see the entire flow of how something was created with all actors.
+
+For the provenance of assets, where on network, there is a serial number connected to an asset, you can match a unique identifier that you previous added to a policy instance, like a uuid inside of a "claim" schema.
+
+Please look at the "TokenAuditTrail" test for more information
 
 ## How it works (low level)
 
