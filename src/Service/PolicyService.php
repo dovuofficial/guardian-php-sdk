@@ -6,6 +6,32 @@ use Exception;
 
 class PolicyService extends AbstractService
 {
+    public function all(): array
+    {
+        return $this->httpClient->get('policies')->data();
+    }
+
+    public function get($id): object
+    {
+        return (object) $this->httpClient->get("policies/{$id}")->data();
+    }
+
+    public function assign(string $username, string $policy_id, bool $assign = true): object
+    {
+        $payload = [
+            "assign" => $assign,
+            "policyIds" => [
+                $policy_id,
+            ],
+        ];
+
+        return (object) $this->httpClient->post(
+            "permissions/users/{$username}/policies/assign",
+            $payload,
+            true
+        )->data();
+    }
+
     /**
      *
      * @param string $policyId

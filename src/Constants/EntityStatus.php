@@ -9,6 +9,8 @@ namespace Dovu\GuardianPhpSdk\Constants;
  */
 enum EntityStatus: string
 {
-    case WAITING = 'waiting';
-    case APPROVED = 'approved';
+    case WAITING = 'Waiting for approval';
+    case APPROVED = 'Approved';
+    case REJECTED = 'Rejected';
+    case MINTING = 'Minting';
 }

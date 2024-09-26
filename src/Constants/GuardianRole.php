@@ -9,6 +9,17 @@ namespace Dovu\GuardianPhpSdk\Constants;
  */
 enum GuardianRole: string
 {
-    case SUPPLIER = 'SUPPLIER';
-    case VERIFIER = 'VERIFIER';
+    // Default
+    case SUPPLIER = 'Supplier';
+    case VERIFIER = 'Verifier';
+    case USER = 'USER';
+    case REGISTRY = 'STANDARD_REGISTRY';
+    case OWNER = 'OWNER';
+    case NONE = 'NO_ROLE';
+
+    // ACM0001 Methodology
+    case PARTICIPANT = 'Project Participant';
+    case VVB = 'VVB';
+
+
 }

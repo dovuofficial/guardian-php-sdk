@@ -10,7 +10,7 @@ use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 
 class GuardianSDKHelper
 {
-    private $sdk;
+    public $sdk;
 
     private string $policyId;
 
@@ -42,9 +42,20 @@ class GuardianSDKHelper
         $this->sdk->accounts->role($this->policyId, $role->value);
     }
 
-    public function accessTokenForRegistry($username = 'dovuauthority', $password = 'secret')
+    public function accessTokenForRegistry($username = 'dovuauthority', $password = '123456')
     {
         return $this->getAccessToken($username, $password);
+    }
+
+    public function authenticateAsRegistry($username = 'dovuauthority', $password = '123456'): void
+    {
+        $token = $this->accessTokenForRegistry($username, $password);
+        $this->setApiKey($token);
+    }
+
+    public function authenticateAsActor($username, $password = '123456'): void
+    {
+        $this->authenticateAsRegistry($username, $password);
     }
 
     public function accessTokenForSupplier($username = 'supplier', $password = 'secret')
@@ -59,7 +70,12 @@ class GuardianSDKHelper
 
     public function getAccessToken($username = '', $password = 'test')
     {
-        return $this->sdk->accounts->login($username, $password)['data']['accessToken'];
+        $login = $this->sdk->accounts->login($username, $password);
+
+        $refresh_token = $login->refreshToken;
+        $token = $this->sdk->accounts->token($refresh_token);
+
+        return $token->accessToken;
     }
 
     public function createNewUser($username = '', $password = 'test')
