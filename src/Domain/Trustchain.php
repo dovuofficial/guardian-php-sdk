@@ -62,7 +62,7 @@ class TrustchainItem
 
     public function format(): array
     {
-        return [
+        $format = [
             "type" => $this->ensureItemType(),
             "proof" => $this->vc_doc->proof,
             "title" => $this->item->title,
@@ -71,12 +71,17 @@ class TrustchainItem
                 "username" => $this->item->username,
             ],
             "visible" => $this->item->visible,
-            "messageId" => $this->document->messageId,
             "createDate" => $this->document->createDate,
             "updateDate" => $this->document->updateDate,
             "description" => $this->item->description,
             "issuanceDate" => $this->vc_doc->issuanceDate,
         ];
+
+        if (array_key_exists('messageId', (array) $this->document)) {
+            $format["messageId"] = $this->document->messageId;
+        }
+
+        return $format;
     }
 }
 

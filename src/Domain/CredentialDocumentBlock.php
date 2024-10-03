@@ -11,7 +11,7 @@ class CredentialDocumentBlock
     private array $block_data;
 
     // Credential subject that can be read inside the nested raw data
-    private object $credential_subject;
+    private ?object $credential_subject;
 
     // Tag is assigned to a document on future submissions
     private ?string $tag = null;
@@ -29,9 +29,13 @@ class CredentialDocumentBlock
          * So the data from a block is a single "item" or first from the list.
          */
         $this->block_data = $this->retrieveBlockDataForContext($block_data, $entityStatus);
+        $this->credential_subject = $this->checkForOptionalSubject();
+    }
 
-        // TODO: Add safety checks for extracting object
-        $this->credential_subject = (object) $this->block_data['document']['credentialSubject']['0'];
+    private function checkForOptionalSubject() : null|object {
+        return array_key_exists('document', $this->block_data) ?
+            (object) $this->block_data['document']['credentialSubject']['0'] :
+            null;
     }
 
     /**

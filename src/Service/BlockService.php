@@ -16,8 +16,6 @@ class BlockService extends AbstractService
             $route .= "?filterByUUID={$uuid}";
         }
 
-        ray($route);
-
         return (object) $this->httpClient->get($route)->data();
     }
 

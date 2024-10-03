@@ -107,8 +107,6 @@ class GuardianSDKHelper
             throw new \Exception('Entity query attempts exhausted.');
         }
 
-        ray($state->attemptMessage());
-
         $query = $this->sdk->state
             ->status($state->status)
             ->filters($state->getFilter())
