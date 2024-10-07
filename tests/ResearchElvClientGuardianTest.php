@@ -6,6 +6,7 @@ use Dovu\GuardianPhpSdk\Constants\Env;
 use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\PolicySchemaDocument;
+use Dovu\GuardianPhpSdk\Domain\Trustchain;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
 use Dovu\GuardianPhpSdk\Support\GuardianActorFacade;
@@ -47,6 +48,8 @@ dataset('project', [
         "field5" => "UNFCCC Third Party Verified Blended Methodologies: AMS-III.BA.: Recovery and recycling of materials from E-waste (v3.0) &AMS-III.AJ: Recovery and recycling of materials from solid wastes (v7.0)",
         "field6" => "01 August 2022",
         "field7" => [ "https://cdm.unfccc.int/methodologies/DB/TO0E8JPL9361FDB1IPF0TUPS0WJXV3", "https://cdm.unfccc.int/methodologies/DB/R22750M155F84YR0D4YVYOS0CLSCII" ],
+        "field8" => "test",
+        "field9" => "FIRST_OPTION",
     ]),
 ]);
 
@@ -112,10 +115,19 @@ dataset('claim', [
 describe('Functional Guardian Test', function () {
     beforeEach(function () {
         $this->sdk = new DovuGuardianAPI();
-        $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
+//        $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
+
+
+        $config = EnvConfig::instance();
+
+        $this->sdk->setGuardianBaseUrl($config->get(Env::GUARDIAN_API_URL));
+
+        $policy_id = $config->get(Env::POLICY_ID);
 
         // TODO: Remove. mmcm elv
-        $policy_id = "667ae92ef14d4f12d4382242";
+//        $policy_id = "66b5e1e76efceb6b593efa73";
+//        $policy_id = "66c616cc6efceb6b593f08de";
+//        $policy_id = $config->testLocalPolicy();
 
         $context = PolicyContext::using($this->sdk)->for($policy_id);
 
@@ -272,7 +284,7 @@ describe('Functional Guardian Test', function () {
          * 2. Ensure dry run and (possible) restart state
          */
         //                $this->policy_mode->dryRun();
-        //        $this->dry_run_scenario->restart();
+        $this->dry_run_scenario->restart();
 
         /**
          * 3. Creating a new user in dry run state where a role is assigned.
@@ -487,20 +499,44 @@ describe('Functional Guardian Test', function () {
     })->skip();
 
     // TODO: in progress
-    //    it('An admin can read the trust chain', function () {
-    //
-    //        $this->helper->authenticateAsRegistry();
-    //
-    //        // TODO: test that a supplier/role could access trustchain
-    //        $uuid = "89325a37-eaf0-47d6-b0cc-6c01c3fcc408";
-    //
-    //        $data = $this->policy_workflow->trustchainForTokenMint($uuid);
-    //
-    //        $trustchain = new Trustchain($data);
-    //
-    //        // TODO: WORK IN PROGRESS
-    //        ray($trustchain->format());
-    //    })->skip();
+    it('An admin can read the trust chain', function () {
+
+        $this->helper->authenticateAsRegistry();
+
+        // TODO: test that a supplier/role could access trustchain
+//        $uuid = "89325a37-eaf0-47d6-b0cc-6c01c3fcc408";
+//        $uuid = "cf3a284b-6092-4287-aaca-7cd7b0e48f23";
+        $uuid = "1ac364bf-85e8-4c34-8447-0950a4aaff6d";
+
+        $data = $this->policy_workflow->trustchainForTokenMint($uuid);
+
+        $trustchain = new Trustchain($data);
+
+        // TODO: WORK IN PROGRESS
+        ray($trustchain->format());
+    })->skip();
+
+    it('An admin can get the token for a policy', function () {
+
+        $this->helper->authenticateAsRegistry();
+
+        $config = EnvConfig::instance();
+
+        $policy_id = $config->testLocalPolicy();
+
+        $token = $this->sdk->policies->token($policy_id);
+
+        expect($token->hasValidToken())->toBeBool();
+        expect($token->id())->toBeTruthy();
+
+        // Testing empty policy
+        $token = $this->sdk->policies->token("null");
+
+        // Technically not
+        expect($token->hasValidToken())->toBeTruthy();
+        expect($token->id())->toBeFalsy();
+
+    });
 
     it('Fetch a specification of a schema for workflow import and validation', function () {
 
@@ -608,8 +644,6 @@ describe('Functional Guardian Test', function () {
         $configuration = $this->policy_workflow->getConfiguration();
         $specification = $configuration->generateWorkflowSpecification($conf->workflow);
 
-        //        return ray($specification);
-
         // Do the thing!
         $this->helper->authenticateAsRegistry($registry_user);
 
@@ -620,7 +654,7 @@ describe('Functional Guardian Test', function () {
          * 3. Update the context objects with the correct uploaded "registry" user and imported policy id.
          */
 
-        $this->policy_mode->dryRun();
+//        $this->policy_mode->dryRun();
 
         /**
          * Create mediator object.
@@ -633,6 +667,8 @@ describe('Functional Guardian Test', function () {
          * TODO: this is a "dry-run" scenario -- so this would need to be changed for a testnet user
          */
         $users = $this->dry_run_scenario->createUser(); // Returns a list of all users
+
+        ray($users);
         $user = (object) end($users);
         $this->dry_run_scenario->login($user->did);
         $this->policy_workflow->assignRole(GuardianRole::SUPPLIER);
@@ -762,6 +798,6 @@ describe('Functional Guardian Test', function () {
 
         // We should be able to read the trustchain.
 
-    });//->skip();
+    })->skip();
 
 })->with('project', 'site', 'claim');
