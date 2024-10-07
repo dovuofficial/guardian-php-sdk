@@ -2,6 +2,7 @@
 
 namespace Dovu\GuardianPhpSdk\Service;
 
+use Dovu\GuardianPhpSdk\Domain\GuardianToken;
 use Exception;
 
 class PolicyService extends AbstractService
@@ -34,105 +35,27 @@ class PolicyService extends AbstractService
 
     /**
      *
+     * Going to make an assumption for this version of the SDK that there is only one token that is
+     * published, might need to revisit.
+     *
      * @param string $policyId
-     * @param string $document
-     * @return array|\Exception
+     * @return GuardianToken
      */
-    public function createProject(string $policyId, string $document)
+    public function token(string $policyId): GuardianToken
     {
-        if (! is_array($document)) {
-            $document = json_decode($document, true);
+
+        $tokens = $this->httpClient->get("tokens?policyId={$policyId}&status=All")->data();
+
+        // object-ify Hack.
+        $as_list = json_decode(json_encode($tokens));
+
+        if (empty($as_list)) {
+            return GuardianToken::none();
         }
 
-        return $this->httpClient->post(uri: "policies/{$policyId}/projects", payload: $document, jsonRequest: true);
-    }
+        // Get first entry for tokens (might be improved later).
+        $token = $as_list[0];
 
-    /**
-     *
-     * @param string $policyId
-     * @param string $entityId
-     * @return array|\Exception
-     */
-    public function approveProject(string $policyId, string $entityId)
-    {
-        return $this->httpClient->put("policies/{$policyId}/approval/projects/{$entityId}");
-    }
-
-    /**
-     *
-     * @param string $policyId
-     * @param string $projectId
-     * @param string|array $document
-     * @return array|\Exception
-     */
-    public function createSite(string $policyId, string $projectId, string|array $document)
-    {
-        if (! is_array($document)) {
-            $document = json_decode($document, true);
-        }
-
-        return $this->httpClient->post(uri: "policies/{$policyId}/projects/{$projectId}/sites", payload: $document, jsonRequest: true);
-    }
-
-    /**
-     *
-     * @param string $policyId
-     * @param string $entityId
-     * @return array|Exception
-     */
-    public function approveSite(string $policyId, string $entityId): array|Exception
-    {
-        return $this->httpClient->put("policies/{$policyId}/approval/sites/{$entityId}");
-    }
-
-    /**
-     *
-     * @param string $policyId
-     * @param string $siteId
-     * @param string|array $document
-     * @return array|\Exception
-     */
-    public function createClaim(string $policyId, string $siteId, string|array $document)
-    {
-        if (! is_array($document)) {
-            $document = json_decode($document, true);
-        }
-
-        return $this->httpClient->post(uri: "policies/{$policyId}/sites/{$siteId}/claims", payload: $document, jsonRequest: true);
-    }
-
-    /**
-     *
-     * @param string $policyId
-     * @param string $entityId
-     * @return array|\Exception
-     */
-    public function approveClaim(string $policyId, string $entityId): array|Exception
-    {
-        return $this->httpClient->put("policies/{$policyId}/approval/claims/{$entityId}");
-    }
-
-    /**
-     *
-     * @param string $policyId
-     * @return array|\Exception
-     */
-    public function trustChain(?string $policyId): array|Exception
-    {
-        if ($policyId === null) {
-            return [];
-        }
-
-        return $this->httpClient->get("policies/{$policyId}/trustchains");
-    }
-
-    /**
-     *
-     * @param string $policyId
-     * @return void
-     */
-    public function token(string $policyId): array|Exception
-    {
-        return $this->httpClient->get("policies/{$policyId}/token");
+        return new GuardianToken($token);
     }
 }
