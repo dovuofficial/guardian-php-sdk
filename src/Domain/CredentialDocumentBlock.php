@@ -57,7 +57,7 @@ class CredentialDocumentBlock
             return $block_by_status;
         }
 
-        throw new Exception("Unable to scan for block by status '$entityStatus->value'");
+        return [];
     }
 
     // Magic method usage to hoist up credential subject field, might revisit later
@@ -79,6 +79,11 @@ class CredentialDocumentBlock
     public function getBlockData(): array
     {
         return $this->block_data;
+    }
+
+    public function hasBlockData(): bool
+    {
+        return ! empty($this->block_data);
     }
 
     /**

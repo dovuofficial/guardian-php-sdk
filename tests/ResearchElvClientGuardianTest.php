@@ -7,6 +7,7 @@ use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\PolicySchemaDocument;
 use Dovu\GuardianPhpSdk\Domain\Trustchain;
+use Dovu\GuardianPhpSdk\Domain\TrustchainQuery;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
 use Dovu\GuardianPhpSdk\Support\GuardianActorFacade;
@@ -504,16 +505,16 @@ describe('Functional Guardian Test', function () {
         $this->helper->authenticateAsRegistry();
 
         // TODO: test that a supplier/role could access trustchain
-//        $uuid = "89325a37-eaf0-47d6-b0cc-6c01c3fcc408";
-//        $uuid = "cf3a284b-6092-4287-aaca-7cd7b0e48f23";
-        $uuid = "1ac364bf-85e8-4c34-8447-0950a4aaff6d";
+        $uuid = "1ac364bf-85e8-4c34-8447-0950a4aaff6d"; // This is working
 
-        $data = $this->policy_workflow->trustchainForTokenMint($uuid);
+        $query = TrustchainQuery::uuid($uuid)->setWait(1);
 
-        $trustchain = new Trustchain($data);
+        $response = $this->policy_workflow->trustchainRequest($query);
+
+        expect($response->hasTrustchainResult())->toBeTruthy();
 
         // TODO: WORK IN PROGRESS
-        ray($trustchain->format());
+//        ray($trustchain->format());
     })->skip();
 
     it('An admin can get the token for a policy', function () {
@@ -792,12 +793,12 @@ describe('Functional Guardian Test', function () {
             ->setApprovalOption(ApprovalOption::APPROVE)
             ->setFilterValue($claim['uuid'])
             ->run();
-
+        
         ray('$approve_claim');
         ray($result);
 
         // We should be able to read the trustchain.
 
-    })->skip();
+    });//->skip();
 
 })->with('project', 'site', 'claim');

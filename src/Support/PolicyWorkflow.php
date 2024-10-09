@@ -7,6 +7,7 @@ use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
 use Dovu\GuardianPhpSdk\Domain\PolicyConfiguration;
+use Dovu\GuardianPhpSdk\Domain\TrustchainQuery;
 
 /**
  * The policy workflow only cares about retrieving and submitting data from/to blocks.
@@ -74,24 +75,35 @@ class PolicyWorkflow
      * We are assuming that there are particular tags in the workflow, without them this could be considered
      * dangerous to use and would require more defensive code.
      *
-     * @param string $claim_state_uuid
-     * @return CredentialDocumentBlock
+     * @param TrustchainQuery $query
+     * @return TrustchainQuery
      */
-    public function trustchainForTokenMint(string $claim_state_uuid)
+    public function trustchainRequest(TrustchainQuery $query): TrustchainQuery
     {
         /**
          * TODO: extract tags
-         * design a DTO for easy usage of trustchain
          */
-        $this->filterByTag("vp_filter_grid", $claim_state_uuid);
+        $this->filterByTag("vp_filter_grid", $query->uuid);
 
         $data = $this->dataByTagToDocumentBlock("vp_grid", EntityStatus::MINTING);
 
-        $hash = $data->getHash();
+        if ($data && $data->hasBlockData()) {
+            $hash = $data->getHash();
 
-        $this->filterByTag("trustChainBlock", $hash);
+            $this->filterByTag("trustChainBlock", $hash);
 
-        return $this->dataByTagToDocumentBlock("trustChainBlock");
+            $result = $this->dataByTagToDocumentBlock("trustChainBlock");
+
+            return $query->withResult($result);
+        }
+
+        if ($query->canAttemptQuery()) {
+            $query->defer();
+
+            return $this->trustchainRequest($query);
+        }
+
+        return $query;
     }
 
     public function getPolicy(): object
