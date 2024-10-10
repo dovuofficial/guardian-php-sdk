@@ -64,7 +64,7 @@ class Mirrornode
      */
     public static function credits($token_id): self
     {
-        $path = "/tokens/{$token_id}/nfts?limit=100";
+        $path = "/tokens/{$token_id}/nfts?order=asc&limit=100";
 
         return new self($path);
     }
