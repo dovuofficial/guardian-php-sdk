@@ -24,9 +24,9 @@ class GuardianToken
      *
      * @return bool
      */
-    public function hasValidToken(): bool
+    public function isTokenPublished(): bool
     {
-        return !!! $this->token->adminId;
+        return !! $this->token->adminId;
     }
 
     public function id(): string
