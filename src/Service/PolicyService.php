@@ -3,6 +3,7 @@
 namespace Dovu\GuardianPhpSdk\Service;
 
 use Dovu\GuardianPhpSdk\Domain\GuardianToken;
+use Dovu\GuardianPhpSdk\Domain\TaskInstance;
 use Exception;
 
 class PolicyService extends AbstractService
@@ -16,6 +17,23 @@ class PolicyService extends AbstractService
     {
         return (object) $this->httpClient->get("policies/{$id}")->data();
     }
+
+    public function publish($id, $version): object
+    {
+        return (object) $this->httpClient->put("policies/push/{$id}/publish", [
+            'policyVersion' => $version,
+        ])->data();
+    }
+
+    public function publishSync(callable $callback, string $id, string $version): TaskInstance
+    {
+        $callback($id, $version);
+
+        $import = TaskInstance::from($this->publish($id, $version));
+
+        return $this->runnerTask($import, $callback);
+    }
+
 
     public function assign(string $username, string $policy_id, bool $assign = true): object
     {
