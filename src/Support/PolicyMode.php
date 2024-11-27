@@ -2,6 +2,8 @@
 
 namespace Dovu\GuardianPhpSdk\Support;
 
+use Dovu\GuardianPhpSdk\Domain\TaskInstance;
+
 enum PolicyStatus: string
 {
     case DRAFT = 'DRAFT';
@@ -23,10 +25,9 @@ class PolicyMode
         return new self($context);
     }
 
-    // TODO: Implement later to publish
-    public function publish()
+    public function publishVersion(callable $callback, string $version): TaskInstance
     {
-
+        return $this->context->policies->publishSync($callback, $this->context->policyId, $version);
     }
 
     public function dryRun()
