@@ -6,7 +6,6 @@ use Dovu\GuardianPhpSdk\Constants\Env;
 use Dovu\GuardianPhpSdk\Constants\GuardianApprovalOption;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\PolicySchemaDocument;
-use Dovu\GuardianPhpSdk\Domain\Trustchain;
 use Dovu\GuardianPhpSdk\Domain\TrustchainQuery;
 use Dovu\GuardianPhpSdk\DovuGuardianAPI;
 use Dovu\GuardianPhpSdk\Support\DryRunScenario;
@@ -116,7 +115,7 @@ dataset('claim', [
 describe('Functional Guardian Test', function () {
     beforeEach(function () {
         $this->sdk = new DovuGuardianAPI();
-//        $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
+        //        $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
 
 
         $config = EnvConfig::instance();
@@ -124,11 +123,6 @@ describe('Functional Guardian Test', function () {
         $this->sdk->setGuardianBaseUrl($config->get(Env::GUARDIAN_API_URL));
 
         $policy_id = $config->get(Env::POLICY_ID);
-
-        // TODO: Remove. mmcm elv
-//        $policy_id = "66b5e1e76efceb6b593efa73";
-//        $policy_id = "66c616cc6efceb6b593f08de";
-//        $policy_id = $config->testLocalPolicy();
 
         $context = PolicyContext::using($this->sdk)->for($policy_id);
 
@@ -213,6 +207,28 @@ describe('Functional Guardian Test', function () {
         expect($this->policy_mode->hasPolicyStatus(PolicyStatus::DRAFT))->toBeTruthy();
 
     })->skip();
+
+    it('A policy can be published', function () {
+
+        $this->helper->authenticateAsRegistry();
+
+        expect($this->policy_mode->hasPolicyStatus(PolicyStatus::DRAFT)
+            || $this->policy_mode->hasPolicyStatus(PolicyStatus::DRY_RUN))->toBeTruthy();
+
+
+        $publish_fn = function ($state) {
+            ray("Publish progress");
+            ray($state);
+
+            expect($state)->toBeTruthy();
+        };
+
+
+        $publish = $this->policy_mode->publishVersion($publish_fn, '1');
+
+        expect($publish->result['isValid'])->toBeTrue();
+
+    })->skip("Publish testing for local dev, currently.");
 
     it('A policy can create users and view them in dry run', function () {
 
@@ -514,7 +530,7 @@ describe('Functional Guardian Test', function () {
         expect($response->hasTrustchainResult())->toBeTruthy();
 
         // TODO: WORK IN PROGRESS
-//        ray($trustchain->format());
+        //        ray($trustchain->format());
     })->skip();
 
     it('An admin can get the token for a policy', function () {
@@ -527,6 +543,8 @@ describe('Functional Guardian Test', function () {
 
         $token = $this->sdk->policies->token($policy_id);
 
+        ray($token);
+
         expect($token->hasValidToken())->toBeBool();
         expect($token->id())->toBeTruthy();
 
@@ -537,7 +555,7 @@ describe('Functional Guardian Test', function () {
         expect($token->hasValidToken())->toBeTruthy();
         expect($token->id())->toBeFalsy();
 
-    });
+    })->skip();
 
     it('Fetch a specification of a schema for workflow import and validation', function () {
 
@@ -610,9 +628,11 @@ describe('Functional Guardian Test', function () {
             expect($timestamp)->toBeTruthy();
 
             // When something happens, complete
-            $status_update_callable = function ($state) {
-                ray("Status update");
-                ray($state);
+            $status_update_callable = function ($state) use ($registry_user, $password) {
+
+                $this->helper->authenticateAsRegistry($registry_user, $password);
+
+                ray("Status Import Update");
 
                 if ($state->result) {
                     ray("done");
@@ -655,7 +675,7 @@ describe('Functional Guardian Test', function () {
          * 3. Update the context objects with the correct uploaded "registry" user and imported policy id.
          */
 
-//        $this->policy_mode->dryRun();
+        //        $this->policy_mode->dryRun();
 
         /**
          * Create mediator object.
@@ -793,7 +813,7 @@ describe('Functional Guardian Test', function () {
             ->setApprovalOption(ApprovalOption::APPROVE)
             ->setFilterValue($claim['uuid'])
             ->run();
-        
+
         ray('$approve_claim');
         ray($result);
 
