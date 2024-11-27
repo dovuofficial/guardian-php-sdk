@@ -4,7 +4,6 @@ namespace Dovu\GuardianPhpSdk\Service;
 
 use Dovu\GuardianPhpSdk\Domain\GuardianToken;
 use Dovu\GuardianPhpSdk\Domain\TaskInstance;
-use Exception;
 
 class PolicyService extends AbstractService
 {
@@ -33,7 +32,6 @@ class PolicyService extends AbstractService
 
         return $this->runnerTask($import, $callback);
     }
-
 
     public function assign(string $username, string $policy_id, bool $assign = true): object
     {

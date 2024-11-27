@@ -68,6 +68,6 @@ class TrustchainQuery
 
     public function hasTrustchainResult(): bool
     {
-        return !! $this->result;
+        return ! ! $this->result;
     }
 }

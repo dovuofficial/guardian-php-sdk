@@ -115,7 +115,7 @@ dataset('claim', [
 describe('Functional Guardian Test', function () {
     beforeEach(function () {
         $this->sdk = new DovuGuardianAPI();
-//        $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
+        //        $this->sdk->setGuardianBaseUrl("http://localhost:3000/api/v1/");
 
 
         $config = EnvConfig::instance();
@@ -530,7 +530,7 @@ describe('Functional Guardian Test', function () {
         expect($response->hasTrustchainResult())->toBeTruthy();
 
         // TODO: WORK IN PROGRESS
-//        ray($trustchain->format());
+        //        ray($trustchain->format());
     })->skip();
 
     it('An admin can get the token for a policy', function () {
@@ -675,7 +675,7 @@ describe('Functional Guardian Test', function () {
          * 3. Update the context objects with the correct uploaded "registry" user and imported policy id.
          */
 
-//        $this->policy_mode->dryRun();
+        //        $this->policy_mode->dryRun();
 
         /**
          * Create mediator object.

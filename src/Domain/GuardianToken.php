@@ -12,10 +12,9 @@ class GuardianToken
     {
         return new self((object) [
            "adminId" => null,
-           "tokenId" => ""
+           "tokenId" => "",
         ]);
     }
-
 
     /**
      * When "adminId" from parent obj is falsely then ignore "id()" fn in client.
@@ -26,7 +25,7 @@ class GuardianToken
      */
     public function isTokenPublished(): bool
     {
-        return !! $this->token->adminId;
+        return ! ! $this->token->adminId;
     }
 
     public function id(): string

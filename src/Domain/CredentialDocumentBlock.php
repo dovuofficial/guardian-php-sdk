@@ -32,7 +32,8 @@ class CredentialDocumentBlock
         $this->credential_subject = $this->checkForOptionalSubject();
     }
 
-    private function checkForOptionalSubject() : null|object {
+    private function checkForOptionalSubject(): null|object
+    {
         return array_key_exists('document', $this->block_data) ?
             (object) $this->block_data['document']['credentialSubject']['0'] :
             null;
