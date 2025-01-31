@@ -14,6 +14,7 @@ enum PropertyFieldType: string
     case String = 'string';
     case Number = 'number';
     case Object = 'object';
+    case Array = 'array';
 }
 
 class WriteablePropertyField
@@ -51,7 +52,10 @@ class SchemaProperties
         public array $schema_document = []
     ) {
         $this->properties = $schema_document["properties"];
-        $this->required = $schema_document["required"];
+
+        // TODO: Resolve this required properties from PHP SDK
+        // $this->required = $schema_document["required"];
+        $this->required = array_keys($this->properties);
     }
 
     public static function inject(PolicySchemaDocument $document, array $properties): SchemaProperties
