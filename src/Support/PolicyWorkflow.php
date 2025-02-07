@@ -3,6 +3,7 @@
 namespace Dovu\GuardianPhpSdk\Support;
 
 use Dovu\GuardianPhpSdk\Constants\BlockKey;
+use Dovu\GuardianPhpSdk\Constants\BlockType;
 use Dovu\GuardianPhpSdk\Constants\EntityStatus;
 use Dovu\GuardianPhpSdk\Constants\GuardianRole;
 use Dovu\GuardianPhpSdk\Domain\CredentialDocumentBlock;
@@ -67,6 +68,36 @@ class PolicyWorkflow
     {
         return $this->context->block->sendToTag($this->context->policyId, $tag, $data);
     }
+
+    public function scanForBlockType(array $children, BlockType $target = BlockType::MINT_BLOCK, array &$res = []): array
+    {
+        foreach ($children as $child) {
+            $c = (object) $child;
+
+            if ($c->blockType === $target->value) {
+                $res[] = $c;
+            }
+
+            $this->scanForBlockType($c->children, $target, $res);
+        }
+
+        return $res;
+    }
+
+     public function mintBlockReference(): object
+     {
+         $conf = $this->getConfiguration();
+         $root_children = $conf->policy->config["children"];
+
+         $mint_blocks = $this->scanForBlockType($root_children);
+
+         if (empty($mint_blocks)) {
+             throw new \Exception('Mint blocks not found');
+         }
+
+         // Assume single or first mint block in policy
+         return $mint_blocks[0];
+     }
 
     /**
      * This is an opinionated method to allow the extraction of a trustchain from a "claim" uuid,

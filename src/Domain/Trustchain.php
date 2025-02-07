@@ -89,6 +89,10 @@ class Trustchain
 {
     private object $trustchain;
 
+    private ?string $token_id = null;
+
+    private ?string $mint_rule = null;
+
     public function __construct(CredentialDocumentBlock $documentBlock)
     {
         $this->trustchain = (object) $documentBlock->getBlockData();
@@ -132,6 +136,20 @@ class Trustchain
         }, array_reverse($documents));
     }
 
+    public function withToken(string $token_id): self
+    {
+        $this->token_id = $token_id;
+
+        return $this;
+    }
+
+    public function withMintRule(string $mint_rule): self
+    {
+        $this->mint_rule = $mint_rule;
+
+        return $this;
+    }
+
     /**
      * TODO: This requires more work as I'm not convinced that there are mappings between
      * the current That I am retrieving versus other datasets, especially around token and
@@ -147,20 +165,22 @@ class Trustchain
         $inner = (object) $document->document;
         $subject = (object) $inner->document;
 
+        $claim = $subject->credentialSubject[0];
+        $amount = array_key_exists($this->mint_rule, $claim) ? $claim[$this->mint_rule] : null;
+
         return [
             "hash" => $document->hash,
-//            "tokenId" => $document->hash,
-//            "topicId" => $document->hash,
-//            "mintDate" => $document->hash,
-            "messageIds" => $inner->messageIds, // Instead of messageId
+            "tokenId" => $this->token_id,
+            "topicId" => $inner->topicId,
+            "mintDate" => $inner->updateDate,
+            "messageIds" => $inner->messageIds,
             "createDate" => $inner->createDate,
             "updateDate" => $inner->updateDate,
-            "mintAmount" => 1, // TODO: Resolve
+            "mintAmount" => $amount,
             "issuer" => $this->issuer(),
             "trustchain" => $this->trustchain(),
             "policy" => $this->policy(),
-            // TODO: check if proof is required
-//             "proof" => null,
+            "proof" => $subject->proof,
         ];
     }
 }
