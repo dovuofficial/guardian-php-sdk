@@ -50,7 +50,7 @@ dataset('claim', [
         "field0" => "Certificate of Deposit",
         "field1" => "COD2023062PB10DN1161",
         "field2" => "https://cloudflare-ipfs.com/ipfs/bafybeiafql4r5xn6nyuamktltmjnklapiyck5w6mtpx7pragvhtr56iase/COD1161.pdf",
-        "field3" => "1", // This can change for token issuance.
+        "field3" => "1000", // This can change for token issuance.
         "field4" => 2023,
         "field5" => [
             "field0" => [
@@ -103,6 +103,23 @@ describe('Functional Guardian Test', function () {
         expect(EnvConfig::instance()->testsEnabled())->toBeTruthy();
     });
 
+//    it('The standard registry can get policy data', function () {
+//
+//        // Prepare initial usernames and configuration
+//        $config = EnvConfig::instance();
+//        $username = Uuid::uuid4();
+//        $registry = $config->get(Env::STANDARD_REGISTRY_USERNAME);
+//        $policy_id = $config->get(Env::POLICY_ID);
+//
+//
+//        $this->helper->authenticateAsRegistry($registry);
+//
+//        $session = $this->sdk->accounts->session();
+//
+//        ray($session);
+//
+//    });
+
     /**
      * This test to create a new user for **published** policies, so testnet/mainnet.
      *
@@ -149,8 +166,12 @@ describe('Functional Guardian Test', function () {
 
         // Expect that the actor has the correct role in policy.
         $state = $this->policy_workflow->getPolicy();
+
         expect($state->userRole)->toBe(GuardianRole::SUPPLIER->value);
 
+        $user_session = $this->sdk->accounts->session();
+
+        expect($user_session->did)->toBeTruthy();
     })->skip();
 
     /**
@@ -181,7 +202,10 @@ describe('Functional Guardian Test', function () {
         $specification = $configuration->generateWorkflowSpecification($conf->workflow);
 
         // The assumption here is that the policy would already be in a "published" state
-        // $this->policy_mode->publish();
+//        ray("Publish Policy: $policy_id -- in progress");
+//        $this->policy_mode->publish();
+//        ray("Publish Policy: $policy_id -- complete");
+
 
         /**
          * Create mediator object, to enable Guardian Actions.
@@ -194,14 +218,14 @@ describe('Functional Guardian Test', function () {
         $username = Uuid::uuid4();
         $this->sdk->accounts->register($username, '123456', GuardianRole::USER);
 
-        $this->helper->authenticateAsRegistry($registry_user);
+        $this->helper->authenticateAsRegistry($registry_user, $password);
         $session = $this->sdk->accounts->session();
         $registry_did = $session->did;
 
         $this->helper->authenticateAsActor($username);
         $this->actor_facade->assignAccountToRegistry($username, $registry_did);
 
-        $this->helper->authenticateAsRegistry($registry_user);
+        $this->helper->authenticateAsRegistry($registry_user, $password);
         $this->sdk->policies->assign($username, $policy_id);
 
         $this->helper->authenticateAsActor($username);
@@ -231,7 +255,7 @@ describe('Functional Guardian Test', function () {
         /**
          * Stage two: login as registry (handled outside workflow)
          */
-        $this->helper->authenticateAsRegistry();
+        $this->helper->authenticateAsRegistry($registry_user, $password);
 
         $approve_ecological = (object) $specification[1];
         $element = WorkflowElement::parse($approve_ecological);
@@ -271,7 +295,7 @@ describe('Functional Guardian Test', function () {
         /**
          * Stage four: login as registry for site approval (handled outside workflow)
          */
-        $this->helper->authenticateAsRegistry();
+        $this->helper->authenticateAsRegistry($registry_user, $password);
 
         $approve_site = (object) $specification[3];
         $element = WorkflowElement::parse($approve_site);
@@ -318,7 +342,7 @@ describe('Functional Guardian Test', function () {
         $this->helper->authenticateAsActor($verifier);
         $this->actor_facade->assignAccountToRegistry($verifier, $registry_did);
 
-        $this->helper->authenticateAsRegistry($registry_user);
+        $this->helper->authenticateAsRegistry($registry_user, $password);
         $this->sdk->policies->assign($verifier, $policy_id);
 
         $this->helper->authenticateAsActor($verifier);
@@ -344,6 +368,6 @@ describe('Functional Guardian Test', function () {
 
         // We should be able to read the trustchain.
 
-    });
+    });//->skip();
 })
     ->with('project', 'site', 'claim');

@@ -7,6 +7,7 @@ use Dovu\GuardianPhpSdk\Service\MrvService;
 use Dovu\GuardianPhpSdk\Service\PolicyService;
 use Dovu\GuardianPhpSdk\Service\SchemaService;
 use Dovu\GuardianPhpSdk\Service\StateService;
+use Dovu\GuardianPhpSdk\Service\TagService;
 use Dovu\GuardianPhpSdk\Service\TrustchainService;
 use Dovu\GuardianPhpSdk\Service\ImportService;
 
@@ -26,6 +27,7 @@ return [
         'policies' => PolicyService::class,
         'mrv' => MrvService::class,
         'state' => StateService::class,
+        'tag' => TagService::class,
         'dry_run' => DryRunService::class,
         'block' => BlockService::class,
         'schema' => SchemaService::class,
