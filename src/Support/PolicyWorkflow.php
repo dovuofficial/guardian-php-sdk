@@ -84,20 +84,20 @@ class PolicyWorkflow
         return $res;
     }
 
-     public function mintBlockReference(): object
-     {
-         $conf = $this->getConfiguration();
-         $root_children = $conf->policy->config["children"];
+    public function mintBlockReference(): object
+    {
+        $conf = $this->getConfiguration();
+        $root_children = $conf->policy->config["children"];
 
-         $mint_blocks = $this->scanForBlockType($root_children);
+        $mint_blocks = $this->scanForBlockType($root_children);
 
-         if (empty($mint_blocks)) {
-             throw new \Exception('Mint blocks not found');
-         }
+        if (empty($mint_blocks)) {
+            throw new \Exception('Mint blocks not found');
+        }
 
-         // Assume single or first mint block in policy
-         return $mint_blocks[0];
-     }
+        // Assume single or first mint block in policy
+        return $mint_blocks[0];
+    }
 
     /**
      * This is an opinionated method to allow the extraction of a trustchain from a "claim" uuid,

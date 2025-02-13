@@ -21,7 +21,7 @@ class TagService extends AbstractService
             'target' => $policy_id,
             'entity' => "Policy",
             'name' => "DOVU",
-            'description' => "DOVU OS Created Policy"
+            'description' => "DOVU OS Created Policy",
         ];
 
         return $this->create($payload);

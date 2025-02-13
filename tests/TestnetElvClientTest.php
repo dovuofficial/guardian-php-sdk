@@ -103,22 +103,22 @@ describe('Functional Guardian Test', function () {
         expect(EnvConfig::instance()->testsEnabled())->toBeTruthy();
     });
 
-//    it('The standard registry can get policy data', function () {
-//
-//        // Prepare initial usernames and configuration
-//        $config = EnvConfig::instance();
-//        $username = Uuid::uuid4();
-//        $registry = $config->get(Env::STANDARD_REGISTRY_USERNAME);
-//        $policy_id = $config->get(Env::POLICY_ID);
-//
-//
-//        $this->helper->authenticateAsRegistry($registry);
-//
-//        $session = $this->sdk->accounts->session();
-//
-//        ray($session);
-//
-//    });
+    //    it('The standard registry can get policy data', function () {
+    //
+    //        // Prepare initial usernames and configuration
+    //        $config = EnvConfig::instance();
+    //        $username = Uuid::uuid4();
+    //        $registry = $config->get(Env::STANDARD_REGISTRY_USERNAME);
+    //        $policy_id = $config->get(Env::POLICY_ID);
+    //
+    //
+    //        $this->helper->authenticateAsRegistry($registry);
+    //
+    //        $session = $this->sdk->accounts->session();
+    //
+    //        ray($session);
+    //
+    //    });
 
     /**
      * This test to create a new user for **published** policies, so testnet/mainnet.
@@ -202,9 +202,9 @@ describe('Functional Guardian Test', function () {
         $specification = $configuration->generateWorkflowSpecification($conf->workflow);
 
         // The assumption here is that the policy would already be in a "published" state
-//        ray("Publish Policy: $policy_id -- in progress");
-//        $this->policy_mode->publish();
-//        ray("Publish Policy: $policy_id -- complete");
+        //        ray("Publish Policy: $policy_id -- in progress");
+        //        $this->policy_mode->publish();
+        //        ray("Publish Policy: $policy_id -- complete");
 
 
         /**
