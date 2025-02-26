@@ -118,7 +118,7 @@ class Trustchain
             "name" => $policy->name,
             "issuer" => [
                 "did" => $policy->issuer,
-                "name" => $policy->username,
+                "username" => $policy->username,
             ],
             "version" => $policy->version,
             "createDate" => $document->createDate,
@@ -178,7 +178,7 @@ class Trustchain
             "updateDate" => $inner->updateDate,
             "mintAmount" => $amount,
             "issuer" => $this->issuer(),
-            "trustchain" => $this->trustchain(),
+            "trustChain" => $this->trustchain(),
             "policy" => $this->policy(),
             "proof" => $subject->proof,
         ];
